@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema Animal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/dashboard" class="navbar-brand">
+                <i class="fas fa-paw"></i> Sistema Animal
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard" class="nav-link active"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="/animales.html" class="nav-link"><i class="fas fa-dog"></i> Animales</a></li>
+                <li><a href="/reportar.html" class="nav-link"><i class="fas fa-exclamation-triangle"></i> Reportar</a></li>
+                <li id="adminLink" style="display: none;"><a href="/admin.html" class="nav-link"><i class="fas fa-cog"></i> Admin</a></li>
+                <li id="vetLink" style="display: none;"><a href="/veterinario.html" class="nav-link"><i class="fas fa-stethoscope"></i> Veterinario</a></li>
+                <li><button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1 id="welcomeMessage">Bienvenido al Sistema Animal</h1>
+            <p id="userInfo">Cargando información...</p>
+            <div class="mt-3" id="userStats">
+                <!-- Estadísticas del usuario -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Quick Actions -->
+        <div class="card animate-fade-in-up">
+            <div class="card-header">
+                <h2><i class="fas fa-bolt"></i> Acciones Rápidas</h2>
+            </div>
+            <div class="quick-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <a href="/animales.html" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Buscar Animales
+                </a>
+                <a href="/reportar.html" class="btn btn-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Reportar Abuso
+                </a>
+                <a href="#" onclick="requestVeterinarian()" id="vetRequestBtn" class="btn btn-warning">
+                    <i class="fas fa-stethoscope"></i> Ser Veterinario
+                </a>
+                <a href="#" onclick="viewMyAdoptions()" class="btn" style="background: #9C27B0; color: white;">
+                    <i class="fas fa-heart"></i> Mis Adopciones
+                </a>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="card animate-fade-in-up">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-bar"></i> Estadísticas</h2>
+            </div>
+            <div class="dashboard-stats" id="statsContainer">
+                <!-- Estadísticas se cargan aquí -->
+            </div>
+        </div>
+
+        <!-- Animales Recientes -->
+        <div class="card animate-fade-in-up">
+            <div class="card-header">
+                <h2><i class="fas fa-paw"></i> Animales Disponibles Recientes</h2>
+                <a href="/animales.html" class="btn">Ver Todos</a>
+            </div>
+            <div class="animals-grid" id="recentAnimals">
+                <!-- Animales se cargan aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <h3><i class="fas fa-paw"></i> Sistema Animal</h3>
+                <p>Ayudando a los animales a encontrar un hogar lleno de amor</p>
+                <div class="footer-links">
+                    <a href="/dashboard"><i class="fas fa-home"></i> Inicio</a>
+                    <a href="/animales.html"><i class="fas fa-dog"></i> Animales</a>
+                    <a href="/reportar.html"><i class="fas fa-exclamation-triangle"></i> Reportar</a>
+                    <a href="#"><i class="fas fa-question-circle"></i> Ayuda</a>
+                </div>
+                <p>&copy; 2024 Sistema Animal. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        let currentUser = null;
+        
+        // Verificar autenticación y cargar datos
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/estadisticas');
+                if (!response.ok) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const stats = await response.json();
+                
+                // Obtener información del usuario
+                const userResponse = await fetch('/api/user');
+                if (userResponse.ok) {
+                    currentUser = (await userResponse.json()).user;
+                    
+                    // Actualizar UI
+                    document.getElementById('welcomeMessage').textContent = `Bienvenido, ${currentUser.nombre}`;
+                    
+                    const userInfo = document.getElementById('userInfo');
+                    userInfo.innerHTML = `
+                        <p><strong>Email:</strong> ${currentUser.email}</p>
+                        <p><strong>Tipo:</strong> <span class="status-badge status-${currentUser.tipo === 'admin' ? 'disponible' : 'tratamiento'}">
+                            ${currentUser.tipo === 'admin' ? 'Administrador' : 
+                              currentUser.tipo === 'veterinario' ? 'Veterinario' : 'Usuario'}
+                        </span></p>
+                    `;
+                    
+                    // Mostrar/ocultar enlaces según tipo
+                    if (currentUser.tipo === 'admin') {
+                        document.getElementById('adminLink').style.display = 'block';
+                    }
+                    
+                    if (currentUser.tipo === 'veterinario') {
+                        document.getElementById('vetLink').style.display = 'block';
+                        document.getElementById('vetRequestBtn').style.display = 'none';
+                    }
+                    
+                    // Ocultar botón de solicitud veterinario para admin
+                    if (currentUser.tipo === 'admin') {
+                        document.getElementById('vetRequestBtn').style.display = 'none';
+                    }
+                }
+                
+                // Cargar estadísticas
+                loadStats(stats);
+                
+                // Cargar animales recientes
+                loadRecentAnimals();
+                
+                // Configurar logout
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/api/logout');
+                        const data = await response.json();
+                        if (data.success) {
+                            window.location.href = data.redirect || '/login.html';
+                        }
+                    } catch (error) {
+                        window.location.href = '/login.html';
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error inicializando:', error);
+                window.location.href = '/login.html';
+            }
+        });
+        
+        function loadStats(stats) {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-paw"></i>
+                    <div class="stat-number">${stats.total_animales}</div>
+                    <div>Animales Totales</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-home"></i>
+                    <div class="stat-number">${stats.animales_adoptados}</div>
+                    <div>Adoptados</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-heart"></i>
+                    <div class="stat-number">${stats.animales_disponibles}</div>
+                    <div>Disponibles</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="stat-number">${stats.adopciones_pendientes}</div>
+                    <div>Adopciones Pendientes</div>
+                </div>
+            `;
+        }
+        
+        async function loadRecentAnimals() {
+            try {
+                const response = await fetch('/api/animales?limit=4');
+                const animales = await response.json();
+                const container = document.getElementById('recentAnimals');
+                
+                if (animales.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center" style="grid-column: 1 / -1; padding: 40px;">
+                            <i class="fas fa-paw" style="font-size: 3rem; color: #ddd; margin-bottom: 20px;"></i>
+                            <h3>No hay animales disponibles</h3>
+                            <p>Sé el primero en reportar un animal que necesite ayuda</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = animales.map(animal => {
+                    const foto = animal.fotos && animal.fotos.length > 0 ? 
+                        animal.fotos[0] : 'https://via.placeholder.com/300x200?text=Sin+imagen';
+                    
+                    return `
+                        <div class="animal-card">
+                            <div class="animal-card-image">
+                                <img src="${foto}" alt="${animal.nombre}" 
+                                     onerror="this.src='https://via.placeholder.com/300x200?text=Sin+imagen'">
+                            </div>
+                            <div class="animal-card-content">
+                                <h3>${animal.nombre}</h3>
+                                <div class="animal-meta">
+                                    <span><i class="fas fa-paw"></i> ${animal.especie}</span>
+                                    <span><i class="fas fa-venus-mars"></i> ${animal.sexo === 'macho' ? 'Macho' : 'Hembra'}</span>
+                                    <span class="status-badge status-${animal.estado}">${animal.estado}</span>
+                                </div>
+                                <p>${animal.descripcion ? animal.descripcion.substring(0, 80) + '...' : 'Sin descripción disponible'}</p>
+                                <div class="mt-2">
+                                    <a href="/animales.html" class="btn" style="width: 100%;">
+                                        <i class="fas fa-eye"></i> Ver más
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                document.getElementById('recentAnimals').innerHTML = `
+                    <div class="text-center" style="grid-column: 1 / -1; padding: 40px; color: #dc3545;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error cargando animales</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function requestVeterinarian() {
+            if (!currentUser) return;
+            
+            const experiencia = prompt('Describe tu experiencia como veterinario:');
+            if (!experiencia) return;
+            
+            const especialidad = prompt('¿Cuál es tu especialidad? (opcional)') || '';
+            
+            try {
+                const response = await fetch('/api/solicitar-veterinario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ experiencia, especialidad })
+                });
+                
+                if (response.ok) {
+                    SistemaAnimal.showMessage('success', '¡Solicitud enviada! Un administrador revisará tu solicitud.');
+                    document.getElementById('vetRequestBtn').style.display = 'none';
+                } else {
+                    SistemaAnimal.showMessage('error', 'Error al enviar la solicitud');
+                }
+            } catch (error) {
+                SistemaAnimal.showMessage('error', 'Error de conexión');
+            }
+        }
+        
+        function viewMyAdoptions() {
+            SistemaAnimal.showMessage('info', 'Próximamente: Verás aquí tus solicitudes de adopción');
+        }
+    </script>
+</body>
+</html>
