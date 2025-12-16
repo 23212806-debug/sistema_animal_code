@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animales para Adopción - Sistema Animal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .header-hero {
+            background: linear-gradient(rgba(76, 175, 80, 0.9), rgba(46, 125, 50, 0.9)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .btn-filter {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-filter:hover {
+            background: #3d8b40;
+        }
+        
+        .animals-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .animal-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .animal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .animal-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .animal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .animal-card:hover .animal-image img {
+            transform: scale(1.05);
+        }
+        
+        .animal-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .status-disponible { background: #4CAF50; }
+        .status-reservado { background: #FF9800; }
+        .status-adoptado { background: #9E9E9E; }
+        .status-tratamiento { background: #2196F3; }
+        
+        .animal-info {
+            padding: 20px;
+        }
+        
+        .animal-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .animal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+            color: #666;
+        }
+        
+        .animal-meta span {
+            background: #f5f5f5;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .animal-description {
+            color: #666;
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .animal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-adoptar {
+            flex: 1;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-adoptar:hover {
+            background: #3d8b40;
+        }
+        
+        .btn-adoptar:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-detalles {
+            flex: 1;
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-detalles:hover {
+            background: #0b7dda;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .no-results i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Modal de detalles */
+        .modal-detail {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-detail-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+        }
+        
+        .modal-close:hover {
+            color: #333;
+        }
+        
+        .animal-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .animal-detail-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .animal-detail-photos img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/dashboard" class="navbar-brand">
+                <i class="fas fa-paw"></i> Sistema Animal
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="/animales.html" class="nav-link active"><i class="fas fa-dog"></i> Animales</a></li>
+                <li><a href="/reportar.html" class="nav-link"><i class="fas fa-exclamation-triangle"></i> Reportar</a></li>
+                <li><button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="header-hero">
+        <div class="container">
+            <h1>Encuentra a tu compañero perfecto</h1>
+            <p>Miles de animales esperan un hogar lleno de amor</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filterEspecie"><i class="fas fa-paw"></i> Especie</label>
+                    <select id="filterEspecie">
+                        <option value="">Todas las especies</option>
+                        <option value="perro">Perro</option>
+                        <option value="gato">Gato</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filterTamano"><i class="fas fa-ruler"></i> Tamaño</label>
+                    <select id="filterTamano">
+                        <option value="">Todos los tamaños</option>
+                        <option value="pequeño">Pequeño</option>
+                        <option value="mediano">Mediano</option>
+                        <option value="grande">Grande</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filterSexo"><i class="fas fa-venus-mars"></i> Sexo</label>
+                    <select id="filterSexo">
+                        <option value="">Ambos sexos</option>
+                        <option value="macho">Macho</option>
+                        <option value="hembra">Hembra</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filterUbicacion"><i class="fas fa-map-marker-alt"></i> Ubicación</label>
+                    <input type="text" id="filterUbicacion" placeholder="Ciudad o zona">
+                </div>
+                
+                <div class="filter-group">
+                    <button class="btn-filter" onclick="loadAnimals()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animales -->
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Cargando animales...</p>
+        </div>
+
+        <div class="animals-container" id="animalsContainer">
+            <!-- Los animales se cargan aquí -->
+        </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>No se encontraron animales</h3>
+            <p>Intenta con otros criterios de búsqueda</p>
+        </div>
+    </div>
+
+    <!-- Modal de detalles -->
+    <div id="detailModal" class="modal-detail">
+        <div class="modal-detail-content">
+            <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+            <div id="detailContent">
+                <!-- Contenido se carga aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de adopción -->
+    <div id="adoptModal" class="modal-detail">
+        <div class="modal-detail-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeAdoptModal()">&times;</button>
+            <h2><i class="fas fa-heart"></i> Solicitar Adopción</h2>
+            <p id="animalAdoptName" style="color: #666; margin-bottom: 20px;"></p>
+            
+            <form id="adoptForm">
+                <input type="hidden" id="adoptAnimalId">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Motivo de adopción *</label>
+                    <textarea id="motivo" rows="4" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;" 
+                              placeholder="Cuéntanos por qué quieres adoptar a este animal..." required></textarea>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Tipo de vivienda *</label>
+                    <select id="vivienda" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;" required>
+                        <option value="">Seleccionar</option>
+                        <option value="casa">Casa con patio</option>
+                        <option value="apartamento">Apartamento</option>
+                        <option value="terreno">Terreno grande</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Experiencia con animales</label>
+                    <select id="experiencia" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+                        <option value="">Seleccionar</option>
+                        <option value="ninguna">Ninguna experiencia</option>
+                        <option value="poca">Poca experiencia</option>
+                        <option value="alguna">Alguna experiencia</option>
+                        <option value="mucha">Mucha experiencia</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="tiene_otros" style="width: 18px; height: 18px;">
+                        <span>¿Tienes otros animales en casa?</span>
+                    </label>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="acepto_terminos" style="width: 18px; height: 18px;" required>
+                        <span>Acepto los términos y condiciones de adopción *</span>
+                    </label>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
+                    <button type="button" onclick="closeAdoptModal()" style="flex: 1; background: #f5f5f5; color: #333; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-paper-plane"></i> Enviar Solicitud
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentAnimalId = null;
+        let currentAnimalName = null;
+        
+        // Verificar sesión y cargar animales
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Verificar sesión
+            try {
+                const response = await fetch('/api/estadisticas');
+                if (!response.ok) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+            } catch (error) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Cargar animales
+            loadAnimals();
+            
+            // Configurar logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/logout');
+                    const data = await response.json();
+                    window.location.href = data.redirect;
+                } catch (error) {
+                    window.location.href = '/login.html';
+                }
+            });
+            
+            // Configurar formulario de adopción
+            document.getElementById('adoptForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const motivo = document.getElementById('motivo').value;
+                const vivienda = document.getElementById('vivienda').value;
+                const experiencia = document.getElementById('experiencia').value;
+                const tieneOtros = document.getElementById('tiene_otros').checked;
+                
+                if (!document.getElementById('acepto_terminos').checked) {
+                    alert('Debes aceptar los términos y condiciones');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/adopciones', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            animal_id: currentAnimalId,
+                            motivo: motivo,
+                            vivienda: vivienda,
+                            experiencia: experiencia,
+                            tiene_otros_animales: tieneOtros
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('✅ ¡Solicitud enviada! El administrador la revisará pronto.');
+                        closeAdoptModal();
+                        loadAnimals(); // Recargar para actualizar estados
+                    } else {
+                        const errorData = await response.json();
+                        alert('❌ Error: ' + (errorData.error || 'Error al enviar la solicitud'));
+                    }
+                } catch (error) {
+                    alert('❌ Error de conexión. Intenta nuevamente.');
+                }
+            });
+        });
+        
+        async function loadAnimals() {
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('animalsContainer');
+            const noResults = document.getElementById('noResults');
+            
+            loading.style.display = 'block';
+            container.innerHTML = '';
+            noResults.style.display = 'none';
+            
+            // Construir query - CORREGIDO: usar "tamano" no "tamaño"
+            const especie = document.getElementById('filterEspecie').value;
+            const tamano = document.getElementById('filterTamano').value;
+            const sexo = document.getElementById('filterSexo').value;
+            const ubicacion = document.getElementById('filterUbicacion').value;
+            
+            let url = '/api/animales';
+            const params = [];
+            
+            if (especie) {
+                params.push(`especie=${especie}`);
+            }
+            if (tamano) {
+                params.push(`tamano=${tamano}`);
+            }
+            if (sexo) {
+                params.push(`sexo=${sexo}`);
+            }
+            if (ubicacion) {
+                params.push(`ubicacion=${ubicacion}`);
+            }
+            
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            try {
+                console.log('Cargando animales desde:', url);
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                
+                const animales = await response.json();
+                console.log('Animales recibidos:', animales);
+                
+                loading.style.display = 'none';
+                
+                if (animales.length === 0) {
+                    noResults.style.display = 'block';
+                    return;
+                }
+                
+                // Mostrar animales
+                container.innerHTML = animales.map(animal => {
+                    // Obtener la primera foto
+                    let fotoPrincipal = 'https://via.placeholder.com/400x300?text=Sin+imagen';
+                    if (animal.fotos && animal.fotos.length > 0) {
+                        fotoPrincipal = animal.fotos[0];
+                    } else if (animal.fotos && typeof animal.fotos === 'string') {
+                        try {
+                            const fotos = JSON.parse(animal.fotos);
+                            if (Array.isArray(fotos) && fotos.length > 0) {
+                                fotoPrincipal = fotos[0];
+                            }
+                        } catch (e) {
+                            // Si no es JSON válido, usar placeholder
+                        }
+                    }
+                    
+                    // Determinar si se puede adoptar
+                    const puedeAdoptar = animal.estado === 'disponible';
+                    
+                    return `
+                        <div class="animal-card">
+                            <div class="animal-image">
+                                <img src="${fotoPrincipal}" 
+                                     alt="${animal.nombre}"
+                                     onerror="this.src='https://via.placeholder.com/400x300?text=Sin+imagen'">
+                                <span class="animal-status status-${animal.estado}">
+                                    ${animal.estado === 'disponible' ? 'Disponible' : 
+                                      animal.estado === 'reservado' ? 'Reservado' : 
+                                      animal.estado === 'adoptado' ? 'Adoptado' : 
+                                      'En tratamiento'}
+                                </span>
+                            </div>
+                            <div class="animal-info">
+                                <h3>${animal.nombre}</h3>
+                                <div class="animal-meta">
+                                    <span><i class="fas fa-paw"></i> ${animal.especie}</span>
+                                    <span><i class="fas fa-venus-mars"></i> ${animal.sexo === 'macho' ? 'Macho' : 'Hembra'}</span>
+                                    <span><i class="fas fa-ruler"></i> ${animal.tamano || 'N/A'}</span>
+                                    ${animal.edad ? `<span><i class="fas fa-birthday-cake"></i> ${animal.edad}</span>` : ''}
+                                </div>
+                                <p class="animal-description">
+                                    ${animal.descripcion ? 
+                                        (animal.descripcion.length > 120 ? 
+                                         animal.descripcion.substring(0, 120) + '...' : 
+                                         animal.descripcion) : 
+                                        'Este animal está buscando un hogar lleno de amor y cuidado.'}
+                                </p>
+                                <div class="animal-actions">
+                                    <button class="btn-detalles" onclick="viewAnimalDetails(${animal.id})">
+                                        <i class="fas fa-eye"></i> Ver detalles
+                                    </button>
+                                    <button class="btn-adoptar" onclick="openAdoptModal(${animal.id}, '${animal.nombre}')" 
+                                            ${!puedeAdoptar ? 'disabled' : ''}>
+                                        <i class="fas fa-heart"></i> ${puedeAdoptar ? 'Adoptar' : 'No disponible'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error cargando animales:', error);
+                loading.style.display = 'none';
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #dc3545;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <h3>Error cargando animales</h3>
+                        <p>${error.message}</p>
+                        <button onclick="loadAnimals()" style="margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-sync"></i> Intentar de nuevo
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Ver detalles del animal
+        async function viewAnimalDetails(animalId) {
+            try {
+                const response = await fetch('/api/animales');
+                const animales = await response.json();
+                const animal = animales.find(a => a.id === animalId);
+                
+                if (!animal) {
+                    alert('Animal no encontrado');
+                    return;
+                }
+                
+                // Manejar fotos
+                let fotosArray = [];
+                if (animal.fotos) {
+                    if (Array.isArray(animal.fotos)) {
+                        fotosArray = animal.fotos;
+                    } else if (typeof animal.fotos === 'string') {
+                        try {
+                            fotosArray = JSON.parse(animal.fotos);
+                        } catch (e) {
+                            fotosArray = [animal.fotos];
+                        }
+                    }
+                }
+                
+                // Crear contenido del modal
+                const fotosHTML = fotosArray.length > 0 ? 
+                    `<div class="animal-detail-photos">
+                        ${fotosArray.map(foto => 
+                            `<img src="${foto}" onerror="this.src='https://via.placeholder.com/120x120?text=Sin+imagen'">`
+                        ).join('')}
+                    </div>` : 
+                    '<p><em>No hay fotos disponibles</em></p>';
+                
+                const content = `
+                    <h2 style="margin-bottom: 20px;">${animal.nombre}</h2>
+                    
+                    <div class="animal-detail-grid">
+                        <div>
+                            <h4><i class="fas fa-info-circle"></i> Información básica</h4>
+                            <p><strong>Especie:</strong> ${animal.especie}</p>
+                            <p><strong>Raza:</strong> ${animal.raza || 'No especificada'}</p>
+                            <p><strong>Edad:</strong> ${animal.edad || 'No especificada'}</p>
+                            <p><strong>Sexo:</strong> ${animal.sexo === 'macho' ? 'Macho' : 'Hembra'}</p>
+                            <p><strong>Tamaño:</strong> ${animal.tamano || 'No especificado'}</p>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-heartbeat"></i> Estado y salud</h4>
+                            <p><strong>Estado:</strong> 
+                                <span class="animal-status status-${animal.estado}" style="display: inline-block;">
+                                    ${animal.estado}
+                                </span>
+                            </p>
+                            <p><strong>Ubicación:</strong> ${animal.ubicacion || 'No especificada'}</p>
+                            <p><strong>Salud:</strong> ${animal.salud || 'Buena'}</p>
+                            <p><strong>Registrado:</strong> ${new Date(animal.creado_en).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <h4><i class="fas fa-file-alt"></i> Descripción</h4>
+                        <p>${animal.descripcion || 'Sin descripción disponible.'}</p>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <h4><i class="fas fa-images"></i> Fotos</h4>
+                        ${fotosHTML}
+                    </div>
+                    
+                    <div style="margin-top: 30px; display: flex; gap: 15px;">
+                        <button onclick="openAdoptModal(${animal.id}, '${animal.nombre}')" 
+                                class="btn-adoptar" 
+                                style="padding: 12px 25px;"
+                                ${animal.estado !== 'disponible' ? 'disabled' : ''}>
+                            <i class="fas fa-heart"></i> 
+                            ${animal.estado === 'disponible' ? 'Solicitar Adopción' : 
+                              animal.estado === 'reservado' ? 'Ya reservado' : 
+                              animal.estado === 'adoptado' ? 'Ya adoptado' : 'No disponible'}
+                        </button>
+                        <button onclick="closeDetailModal()" 
+                                style="padding: 12px 25px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailModal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error viendo detalles:', error);
+                alert('Error al cargar detalles del animal');
+            }
+        }
+        
+        // Abrir modal de adopción
+        function openAdoptModal(animalId, animalName) {
+            currentAnimalId = animalId;
+            currentAnimalName = animalName;
+            
+            document.getElementById('adoptAnimalId').value = animalId;
+            document.getElementById('animalAdoptName').textContent = `Estás solicitando adoptar a: ${animalName}`;
+            
+            // Limpiar formulario
+            document.getElementById('adoptForm').reset();
+            
+            document.getElementById('adoptModal').style.display = 'flex';
+        }
+        
+        // Cerrar modales
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+        
+        function closeAdoptModal() {
+            document.getElementById('adoptModal').style.display = 'none';
+            document.getElementById('adoptForm').reset();
+            currentAnimalId = null;
+            currentAnimalName = null;
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-detail')) {
+                closeDetailModal();
+                closeAdoptModal();
+            }
+        }
+        
+        // Recargar con filtros
+        document.getElementById('filterEspecie').addEventListener('change', loadAnimals);
+        document.getElementById('filterTamano').addEventListener('change', loadAnimals);
+        document.getElementById('filterSexo').addEventListener('change', loadAnimals);
+        document.getElementById('filterUbicacion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadAnimals();
+            }
+        });
+    </script>
+</body>
+</html>

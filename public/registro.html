@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Sistema Animal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .register-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2196F3, #0b7dda);
+            padding: 20px;
+        }
+        
+        .register-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo i {
+            font-size: 3rem;
+            color: #2196F3;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+        
+        .user-type {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .user-type label {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .user-type input[type="radio"] {
+            display: none;
+        }
+        
+        .user-type input[type="radio"]:checked + label {
+            border-color: #2196F3;
+            background: #e3f2fd;
+            color: #2196F3;
+            font-weight: 600;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-register:hover {
+            background: #0b7dda;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="logo">
+                <i class="fas fa-paw"></i>
+                <h1>Crear Cuenta</h1>
+                <p>Únete a nuestra comunidad animal</p>
+            </div>
+            
+            <div id="alertMessage" class="alert" style="display: none;"></div>
+            
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre"><i class="fas fa-user"></i> Nombre Completo</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Juan Pérez">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="telefono"><i class="fas fa-phone"></i> Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="55 1234 5678">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                    <input type="email" id="email" name="email" required placeholder="tu@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" minlength="6">
+                </div>
+                
+                <!-- ELIMINADO EL CAMPO DIRECCIÓN QUE NO EXISTE EN LA BD -->
+                <!-- 
+                <div class="form-group">
+                    <label for="direccion"><i class="fas fa-home"></i> Dirección</label>
+                    <input type="text" id="direccion" name="direccion" placeholder="Calle, número, ciudad">
+                </div>
+                -->
+                
+                <div class="form-group">
+                    <label>Tipo de Cuenta</label>
+                    <div class="user-type">
+                        <input type="radio" id="tipo_usuario" name="tipo" value="usuario" checked>
+                        <label for="tipo_usuario">
+                            <i class="fas fa-user-friends fa-2x"></i><br>
+                            Usuario<br>
+                            <small>Adoptar y reportar</small>
+                        </label>
+                        
+                        <input type="radio" id="tipo_veterinario" name="tipo" value="veterinario">
+                        <label for="tipo_veterinario">
+                            <i class="fas fa-stethoscope fa-2x"></i><br>
+                            Veterinario<br>
+                            <small>Atención médica</small>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="veterinarioInfo" class="info-box" style="display: none;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Nota para veterinarios:</strong> Todos los usuarios se registran como "Usuario". Después de crear tu cuenta, puedes solicitar ser veterinario desde el Dashboard.
+                </div>
+                
+                <button type="submit" class="btn-register">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+                
+                <p style="text-align: center; margin-top: 20px;">
+                    ¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar/ocultar info para veterinarios
+        document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const vetInfo = document.getElementById('veterinarioInfo');
+                vetInfo.style.display = this.value === 'veterinario' ? 'block' : 'none';
+            });
+        });
+        
+        // Manejar el registro - VERSIÓN CORREGIDA
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // SOLO ENVIAMOS LOS CAMPOS QUE EXISTEN EN LA BD
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                telefono: document.getElementById('telefono').value
+                // NO ENVIAMOS 'direccion' ni 'tipo' porque no existen en el endpoint
+            };
+            
+            const alertDiv = document.getElementById('alertMessage');
+            const tipoSeleccionado = document.querySelector('input[name="tipo"]:checked').value;
+            
+            // Validaciones
+            if (!formData.nombre || !formData.email || !formData.password) {
+                showAlert('Por favor completa los campos requeridos', 'error');
+                return;
+            }
+            
+            if (formData.password.length < 6) {
+                showAlert('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
+            try {
+                console.log('📤 Enviando datos de registro:', formData);
+                
+                const response = await fetch('/api/registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                console.log('📥 Respuesta del servidor:', data);
+                
+                if (response.ok) {
+                    let mensaje = data.message || 'Cuenta creada exitosamente.';
+                    
+                    // Información adicional para veterinarios
+                    if (tipoSeleccionado === 'veterinario') {
+                        mensaje += ' IMPORTANTE: Para ser veterinario, después de iniciar sesión, ve al Dashboard y haz clic en "Ser Veterinario" para enviar tu solicitud.';
+                    }
+                    
+                    showAlert(mensaje + ' Redirigiendo...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    showAlert(data.error || 'Error al registrar usuario', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error en registro:', error);
+                showAlert('Error de conexión. Verifica tu internet.', 'error');
+            }
+        });
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

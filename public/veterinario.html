@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Veterinario - Sistema Animal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ESTILOS ESPECÍFICOS PARA VETERINARIO */
+        .vet-header {
+            background: linear-gradient(135deg, #00695C, #004D40);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 105, 92, 0.3);
+        }
+        
+        .vet-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .vet-tab {
+            flex: 1;
+            padding: 18px 25px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 4px solid transparent;
+            background: #f8f9fa;
+            color: #555;
+        }
+        
+        .vet-tab:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .vet-tab.active {
+            background: white;
+            color: #00695C;
+            border-bottom-color: #00695C;
+            font-weight: 700;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .vet-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .vet-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* DASHBOARD */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .vet-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s;
+            border-left: 5px solid #00695C;
+        }
+        
+        .vet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .vet-card i {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: #00695C;
+        }
+        
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #004D40;
+        }
+        
+        .vet-card p {
+            color: #666;
+            font-size: 15px;
+            margin: 0;
+        }
+        
+        /* LISTA DE ANIMALES */
+        .animal-list-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .section-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 180px;
+        }
+        
+        .btn-refresh {
+            padding: 10px 15px;
+            background: #00695C;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-refresh:hover {
+            background: #004D40;
+        }
+        
+        .animal-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .animal-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto auto;
+            gap: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+        
+        .animal-item:hover {
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .animal-item:last-child {
+            border-bottom: none;
+        }
+        
+        .animal-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .animal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .animal-info {
+            min-width: 0;
+        }
+        
+        .animal-info strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .animal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .animal-tag {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .animal-tag i {
+            margin-right: 5px;
+            font-size: 11px;
+        }
+        
+        .animal-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .status-disponible { background: #C8E6C9; color: #1B5E20; }
+        .status-tratamiento { background: #FFE0B2; color: #E65100; }
+        .status-reservado { background: #BBDEFB; color: #0D47A1; }
+        .status-adoptado { background: #E1BEE7; color: #4A148C; }
+        
+        .animal-actions {
+            display: flex;
+            gap: 10px;
+            white-space: nowrap;
+        }
+        
+        .btn-attend {
+            background: #00695C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        
+        .btn-attend:hover {
+            background: #004D40;
+        }
+        
+        .btn-state {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        
+        .btn-state:hover {
+            background: #F57C00;
+        }
+        
+        /* FORMULARIO DE ATENCIÓN */
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .form-header h3 {
+            margin: 0;
+            color: #00695C;
+            font-size: 1.8rem;
+        }
+        
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-cancel:hover {
+            background: #e9e9e9;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: #00695C;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00695C;
+            box-shadow: 0 0 0 3px rgba(0, 105, 92, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .state-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #FF9800;
+            margin-bottom: 30px;
+        }
+        
+        .state-section h4 {
+            margin-top: 0;
+            color: #E65100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .state-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .btn-save {
+            background: #00695C;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            grid-column: span 2;
+            margin-top: 20px;
+        }
+        
+        .btn-save:hover {
+            background: #004D40;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 105, 92, 0.3);
+        }
+        
+        /* HISTORIAL */
+        .history-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .history-item {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #00695C;
+            transition: transform 0.3s;
+        }
+        
+        .history-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .history-date {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .history-type {
+            background: #00695C;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .history-content p {
+            margin: 10px 0;
+            color: #333;
+        }
+        
+        .history-content strong {
+            color: #555;
+            margin-right: 5px;
+        }
+        
+        /* ESTADOS VACÍOS */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state small {
+            color: #aaa;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .loading i {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #00695C;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(3px);
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: modalSlide 0.3s ease-out;
+        }
+        
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .animal-item {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .animal-actions {
+                grid-column: 1;
+                justify-content: flex-start;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width,
+            .btn-save {
+                grid-column: span 1;
+            }
+            
+            .state-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .vet-tabs {
+                flex-direction: column;
+            }
+            
+            .vet-tab {
+                padding: 15px;
+                text-align: left;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .filter-select,
+            .btn-refresh {
+                width: 100%;
+            }
+        }
+        
+        /* SCROLLBAR PERSONALIZADO */
+        .animal-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .animal-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .animal-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .animal-list::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/dashboard" class="navbar-brand">
+                <i class="fas fa-paw"></i> Sistema Animal
+                <span style="font-size: 14px; margin-left: 10px; background: #00695C; color: white; padding: 3px 8px; border-radius: 12px;">Veterinario</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="/animales.html" class="nav-link"><i class="fas fa-dog"></i> Animales</a></li>
+                <li><a href="/veterinario.html" class="nav-link active"><i class="fas fa-stethoscope"></i> Veterinario</a></li>
+                <li><button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="vet-header">
+        <div class="container">
+            <h1><i class="fas fa-user-md"></i> Panel Veterinario</h1>
+            <p>Atención médica, diagnóstico y manejo de estados de los animales</p>
+            <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px;">
+                    <i class="fas fa-user"></i> <span id="vetName">Cargando...</span>
+                </span>
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px;">
+                    <i class="fas fa-id-card"></i> Veterinario certificado
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="vet-tabs">
+            <div class="vet-tab active" onclick="showVetTab('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </div>
+            <div class="vet-tab" onclick="showVetTab('atender')">
+                <i class="fas fa-heartbeat"></i> Atender Animales
+            </div>
+            <div class="vet-tab" onclick="showVetTab('historial')">
+                <i class="fas fa-history"></i> Historial Médico
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="vetDashboard" class="vet-content active">
+            <div class="dashboard-cards">
+                <div class="vet-card">
+                    <i class="fas fa-heartbeat"></i>
+                    <div class="card-value" id="totalTratamiento">0</div>
+                    <p>Animales en Tratamiento</p>
+                </div>
+                <div class="vet-card">
+                    <i class="fas fa-clipboard-check"></i>
+                    <div class="card-value" id="totalDisponibles">0</div>
+                    <p>Animales Disponibles</p>
+                </div>
+                <div class="vet-card">
+                    <i class="fas fa-file-medical-alt"></i>
+                    <div class="card-value" id="totalAtendidos">0</div>
+                    <p>Animales Atendidos</p>
+                </div>
+                <div class="vet-card">
+                    <i class="fas fa-user-md"></i>
+                    <div class="card-value" id="totalAsignados">0</div>
+                    <p>Animales Asignados</p>
+                </div>
+            </div>
+
+            <div class="animal-list-container">
+                <div class="section-header">
+                    <h3><i class="fas fa-clock"></i> Atenciones Recientes</h3>
+                </div>
+                <div id="recentHistory">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Cargando atenciones recientes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Atender Animales -->
+        <div id="vetAtender" class="vet-content">
+            <!-- Filtros y controles -->
+            <div class="animal-list-container">
+                <div class="section-header">
+                    <h3><i class="fas fa-stethoscope"></i> Animales para Atender</h3>
+                    <div class="controls">
+                        <select id="filterEstado" class="filter-select" onchange="loadAnimalsForCare()">
+                            <option value="">Todos los estados</option>
+                            <option value="tratamiento">En tratamiento</option>
+                            <option value="disponible">Disponibles</option>
+                            <option value="reservado">Reservados</option>
+                        </select>
+                        <button class="btn-refresh" onclick="loadAnimalsForCare()">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="animal-list" id="animalsNeedingCare">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Cargando animales...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de atención (oculto inicialmente) -->
+            <div id="attentionForm" class="form-container" style="display: none;">
+                <div class="form-header">
+                    <h3 id="animalNameHeader"></h3>
+                    <button class="btn-cancel" onclick="hideAttentionForm()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+
+                <form id="vetForm">
+                    <!-- SECCIÓN DE CAMBIO DE ESTADO -->
+                    <div class="state-section">
+                        <h4><i class="fas fa-exchange-alt"></i> Cambiar Estado del Animal</h4>
+                        <div class="state-grid">
+                            <div class="form-group">
+                                <label for="nuevoEstado"><i class="fas fa-heartbeat"></i> Nuevo Estado *</label>
+                                <select id="nuevoEstado" required>
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="disponible">🟢 Disponible (saludable para adopción)</option>
+                                    <option value="tratamiento">🟡 En tratamiento (necesita cuidados)</option>
+                                    <option value="reservado">🔵 Reservado (proceso de adopción)</option>
+                                </select>
+                                <small style="color: #666; font-size: 13px;">El estado se actualizará automáticamente</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="razonEstado"><i class="fas fa-sticky-note"></i> Razón del cambio</label>
+                                <input type="text" id="razonEstado" 
+                                       placeholder="Ej: Completado tratamiento, necesita cirugía, etc.">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INFORMACIÓN DE LA ATENCIÓN -->
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tipoAtencion"><i class="fas fa-tag"></i> Tipo de Atención *</label>
+                            <select id="tipoAtencion" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="consulta">Consulta General</option>
+                                <option value="vacunacion">Vacunación</option>
+                                <option value="cirugia">Cirugía</option>
+                                <option value="tratamiento">Tratamiento</option>
+                                <option value="control">Control de rutina</option>
+                                <option value="emergencia">Emergencia</option>
+                                <option value="desparasitacion">Desparasitación</option>
+                                <option value="castracion">Castración/Esterilización</option>
+                                <option value="chequeo">Chequeo completo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fechaAtencion"><i class="fas fa-calendar"></i> Fecha de Atención *</label>
+                            <input type="date" id="fechaAtencion" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="diagnostico"><i class="fas fa-file-medical-alt"></i> Diagnóstico *</label>
+                            <textarea id="diagnostico" rows="4" required 
+                                      placeholder="Describe el diagnóstico encontrado..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="tratamiento"><i class="fas fa-pills"></i> Tratamiento *</label>
+                            <textarea id="tratamiento" rows="4" required 
+                                      placeholder="Describe el tratamiento prescrito..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="medicamentos"><i class="fas fa-capsules"></i> Medicamentos (opcional)</label>
+                            <textarea id="medicamentos" rows="3" 
+                                      placeholder="Lista de medicamentos, dosis, frecuencia..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="proximaCita"><i class="fas fa-calendar-plus"></i> Próxima Cita</label>
+                            <input type="date" id="proximaCita">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="costo"><i class="fas fa-dollar-sign"></i> Costo Aproximado</label>
+                            <input type="number" id="costo" placeholder="$0.00" step="0.01" min="0">
+                        </div>
+
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Guardar Atención y Cambiar Estado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Historial Médico -->
+        <div id="vetHistorial" class="vet-content">
+            <div class="history-container">
+                <div class="section-header">
+                    <h3><i class="fas fa-history"></i> Historial Médico Completo</h3>
+                    <div class="controls">
+                        <select id="filterHistorial" class="filter-select" onchange="loadMedicalHistory()">
+                            <option value="">Todos los animales</option>
+                        </select>
+                        <button class="btn-refresh" onclick="loadMedicalHistory()">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="medicalHistory">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Cargando historial médico...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cambios rápidos de estado -->
+    <div id="stateModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeStateModal()">&times;</button>
+            <h2><i class="fas fa-exchange-alt"></i> Cambiar Estado Rápido</h2>
+            <p id="modalAnimalInfo" style="color: #666; margin-bottom: 30px;"></p>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
+                <button class="state-option" onclick="quickSetState('disponible')" style="background: #C8E6C9; color: #1B5E20;">
+                    <i class="fas fa-check-circle"></i>
+                    <div style="font-size: 1.2rem; font-weight: bold;">Disponible</div>
+                    <small>Saludable para adopción</small>
+                </button>
+                <button class="state-option" onclick="quickSetState('tratamiento')" style="background: #FFE0B2; color: #E65100;">
+                    <i class="fas fa-heartbeat"></i>
+                    <div style="font-size: 1.2rem; font-weight: bold;">Tratamiento</div>
+                    <small>Necesita cuidados</small>
+                </button>
+                <button class="state-option" onclick="quickSetState('reservado')" style="background: #BBDEFB; color: #0D47A1;">
+                    <i class="fas fa-user-check"></i>
+                    <div style="font-size: 1.2rem; font-weight: bold;">Reservado</div>
+                    <small>En proceso adopción</small>
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label for="modalRazon"><i class="fas fa-sticky-note"></i> Razón del cambio</label>
+                <input type="text" id="modalRazon" placeholder="¿Por qué cambias el estado?" style="width: 100%;">
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button onclick="closeStateModal()" style="flex: 1; padding: 15px; background: #f5f5f5; color: #333; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button onclick="saveQuickState()" style="flex: 1; padding: 15px; background: #00695C; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-check"></i> Cambiar Estado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de detalles del animal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+            <div id="detailContent">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentAnimalId = null;
+        let currentAnimalName = null;
+        let currentAnimalEstado = null;
+        
+        // ================= INICIALIZACIÓN =================
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Inicializando panel veterinario...');
+            
+            // Verificar sesión y permisos
+            await checkVeterinarioAccess();
+            
+            // Configurar fecha actual
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaAtencion').value = today;
+            
+            // Establecer fecha de próxima cita por defecto (7 días)
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('proximaCita').value = nextWeek.toISOString().split('T')[0];
+            
+            // Configurar eventos
+            setupEventListeners();
+            
+            // Cargar datos iniciales
+            await loadInitialData();
+            
+            console.log('✅ Panel veterinario inicializado');
+        });
+        
+        // ================= FUNCIONES DE ACCESO =================
+        async function checkVeterinarioAccess() {
+            try {
+                const response = await fetch('/api/user');
+                if (!response.ok) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const userData = await response.json();
+                const user = userData.user;
+                
+                if (!user || user.tipo !== 'veterinario') {
+                    alert('❌ No tienes permisos de veterinario');
+                    window.location.href = '/dashboard';
+                    return;
+                }
+                
+                // Mostrar nombre del veterinario
+                document.getElementById('vetName').textContent = user.nombre;
+                
+            } catch (error) {
+                console.error('Error verificando acceso:', error);
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // ================= CONFIGURACIÓN DE EVENTOS =================
+        function setupEventListeners() {
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/logout');
+                    const data = await response.json();
+                    window.location.href = data.redirect;
+                } catch (error) {
+                    window.location.href = '/login.html';
+                }
+            });
+            
+            // Formulario de atención
+            document.getElementById('vetForm').addEventListener('submit', handleAttentionSubmit);
+        }
+        
+        // ================= CARGA INICIAL DE DATOS =================
+        async function loadInitialData() {
+            try {
+                // Cargar estadísticas del dashboard
+                await loadDashboardStats();
+                
+                // Cargar animales iniciales
+                await loadAnimalsForCare();
+                
+                // Cargar opciones para filtro de historial
+                await loadAnimalOptions();
+                
+            } catch (error) {
+                console.error('Error cargando datos iniciales:', error);
+                showAlert('error', 'Error al cargar datos iniciales');
+            }
+        }
+        
+        // ================= DASHBOARD =================
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/veterinario/dashboard-stats');
+                const stats = await response.json();
+                
+                // Actualizar tarjetas
+                document.getElementById('totalTratamiento').textContent = stats.en_tratamiento || 0;
+                document.getElementById('totalDisponibles').textContent = stats.disponibles || 0;
+                document.getElementById('totalAtendidos').textContent = stats.historial_total || 0;
+                document.getElementById('totalAsignados').textContent = stats.asignados || 0;
+                
+                // Cargar historial reciente
+                await loadRecentHistory();
+                
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                // Mostrar ceros en caso de error
+                ['totalTratamiento', 'totalDisponibles', 'totalAtendidos', 'totalAsignados'].forEach(id => {
+                    document.getElementById(id).textContent = '0';
+                });
+            }
+        }
+        
+        async function loadRecentHistory() {
+            const container = document.getElementById('recentHistory');
+            
+            try {
+                // Obtener todos los animales
+                const animalsResponse = await fetch('/api/veterinario/animales');
+                const animals = await animalsResponse.json();
+                
+                // Tomar los primeros 5 animales en tratamiento
+                const recentAnimals = animals
+                    .filter(a => a.estado === 'tratamiento')
+                    .slice(0, 5);
+                
+                if (recentAnimals.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <p>No hay animales en tratamiento recientes</p>
+                            <small>Todos los animales están saludables</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = recentAnimals.map(animal => {
+                    let foto = 'https://via.placeholder.com/60x60?text=Sin+img';
+                    if (animal.fotos && animal.fotos.length > 0) {
+                        foto = animal.fotos[0];
+                    }
+                    
+                    return `
+                        <div class="animal-item" onclick="attendAnimal(${animal.id}, '${animal.nombre}', '${animal.estado}')">
+                            <div class="animal-image">
+                                <img src="${foto}" onerror="this.src='https://via.placeholder.com/60x60?text=Sin+img'">
+                            </div>
+                            <div class="animal-info">
+                                <strong>${animal.nombre}</strong>
+                                <div class="animal-tags">
+                                    <span class="animal-tag"><i class="fas fa-paw"></i> ${animal.especie}</span>
+                                    <span class="animal-tag"><i class="fas fa-user-md"></i> ${animal.veterinario_asignado}</span>
+                                    ${animal.edad ? `<span class="animal-tag"><i class="fas fa-birthday-cake"></i> ${animal.edad}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="animal-status status-tratamiento">En tratamiento</div>
+                            <div class="animal-actions">
+                                <button class="btn-attend" onclick="attendAnimal(${animal.id}, '${animal.nombre}', '${animal.estado}'); event.stopPropagation();">
+                                    <i class="fas fa-stethoscope"></i> Atender
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                container.innerHTML = '<p style="color: #dc3545; text-align: center;">Error cargando historial reciente</p>';
+            }
+        }
+        
+        // ================= ATENDER ANIMALES =================
+async function loadAnimalsForCare() {
+    const container = document.getElementById('animalsNeedingCare');
+    const filterEstado = document.getElementById('filterEstado').value;
+    
+    container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Cargando animales...</p></div>';
+    
+    try {
+        let url = '/api/veterinario/animales';
+        if (filterEstado) {
+            url += `?estado=${filterEstado}`;
+        }
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const animals = await response.json();
+        
+        // Asegurar que animals sea array
+        if (!Array.isArray(animals)) {
+            console.error('❌ animals no es array:', animals);
+            throw new Error('La respuesta del servidor no es un array válido');
+        }
+        
+        if (animals.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>No se encontraron animales</p>
+                    <small>Prueba con otro filtro o vuelve más tarde</small>
+                </div>
+            `;
+            return;
+        }
+        
+     
+                
+                container.innerHTML = animals.map(animal => {
+                    // Obtener foto principal
+                    let foto = 'https://via.placeholder.com/80x80?text=Sin+img';
+                    if (animal.fotos && animal.fotos.length > 0) {
+                        foto = animal.fotos[0];
+                    }
+                    
+                    // Determinar clase y texto del estado
+                    let estadoClass = '';
+                    let estadoTexto = '';
+                    switch(animal.estado) {
+                        case 'disponible':
+                            estadoClass = 'status-disponible';
+                            estadoTexto = 'Disponible';
+                            break;
+                        case 'tratamiento':
+                            estadoClass = 'status-tratamiento';
+                            estadoTexto = 'En tratamiento';
+                            break;
+                        case 'reservado':
+                            estadoClass = 'status-reservado';
+                            estadoTexto = 'Reservado';
+                            break;
+                        case 'adoptado':
+                            estadoClass = 'status-adoptado';
+                            estadoTexto = 'Adoptado';
+                            break;
+                        default:
+                            estadoClass = 'status-disponible';
+                            estadoTexto = animal.estado;
+                    }
+                    
+                    return `
+                        <div class="animal-item">
+                            <div class="animal-image" onclick="viewAnimalDetails(${animal.id})">
+                                <img src="${foto}" onerror="this.src='https://via.placeholder.com/80x80?text=Sin+img'">
+                            </div>
+                            <div class="animal-info" onclick="viewAnimalDetails(${animal.id})">
+                                <strong>${animal.nombre}</strong>
+                                <div class="animal-tags">
+                                    <span class="animal-tag"><i class="fas fa-paw"></i> ${animal.especie}</span>
+                                    ${animal.raza ? `<span class="animal-tag"><i class="fas fa-dna"></i> ${animal.raza}</span>` : ''}
+                                    ${animal.edad ? `<span class="animal-tag"><i class="fas fa-birthday-cake"></i> ${animal.edad}</span>` : ''}
+                                    ${animal.veterinario_asignado ? `<span class="animal-tag"><i class="fas fa-user-md"></i> ${animal.veterinario_asignado}</span>` : ''}
+                                </div>
+                                <p style="margin-top: 8px; font-size: 14px; color: #666; line-height: 1.4;">
+                                    ${animal.descripcion ? (animal.descripcion.length > 120 ? animal.descripcion.substring(0, 120) + '...' : animal.descripcion) : 'Sin descripción disponible'}
+                                </p>
+                            </div>
+                            <div class="animal-status ${estadoClass}">${estadoTexto}</div>
+                            <div class="animal-actions">
+                                <button class="btn-attend" onclick="attendAnimal(${animal.id}, '${animal.nombre}', '${animal.estado}')">
+                                    <i class="fas fa-stethoscope"></i> Atender
+                                </button>
+                                <button class="btn-state" onclick="openStateModal(${animal.id}, '${animal.nombre}', '${animal.estado}')">
+                                    <i class="fas fa-exchange-alt"></i> Estado
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error cargando animales:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                        <p>Error cargando animales</p>
+                        <small>${error.message}</small>
+                        <button onclick="loadAnimalsForCare()" style="margin-top: 15px; padding: 8px 20px; background: #00695C; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function attendAnimal(animalId, animalName, estadoActual) {
+            currentAnimalId = animalId;
+            currentAnimalName = animalName;
+            currentAnimalEstado = estadoActual;
+            
+            // Mostrar formulario
+            const form = document.getElementById('attentionForm');
+            form.style.display = 'block';
+            document.getElementById('animalNameHeader').textContent = `Atender a: ${animalName}`;
+            
+            // Configurar estado por defecto basado en el estado actual
+            const estadoSelect = document.getElementById('nuevoEstado');
+            if (estadoActual === 'tratamiento') {
+                // Si ya está en tratamiento, sugerir cambiar a disponible
+                estadoSelect.value = 'disponible';
+                document.getElementById('razonEstado').value = 'Tratamiento completado exitosamente';
+            } else if (estadoActual === 'disponible') {
+                // Si está disponible, sugerir tratamiento
+                estadoSelect.value = 'tratamiento';
+                document.getElementById('razonEstado').value = 'Necesita atención veterinaria';
+            } else {
+                estadoSelect.value = '';
+            }
+            
+            // Establecer fecha de atención como hoy
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaAtencion').value = today;
+            
+            // Establecer próxima cita (7 días después)
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('proximaCita').value = nextWeek.toISOString().split('T')[0];
+            
+            // Desplazar al formulario
+            form.scrollIntoView({ behavior: 'smooth' });
+            
+            // Poner foco en el primer campo
+            setTimeout(() => {
+                document.getElementById('tipoAtencion').focus();
+            }, 300);
+        }
+        
+        function hideAttentionForm() {
+            document.getElementById('attentionForm').style.display = 'none';
+            document.getElementById('vetForm').reset();
+            currentAnimalId = null;
+            currentAnimalName = null;
+            currentAnimalEstado = null;
+            
+            // Restaurar fechas por defecto
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaAtencion').value = today;
+            
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('proximaCita').value = nextWeek.toISOString().split('T')[0];
+        }
+        
+        async function handleAttentionSubmit(e) {
+            e.preventDefault();
+            
+            if (!currentAnimalId) {
+                showAlert('error', 'No hay animal seleccionado');
+                return;
+            }
+            
+            // Validar campos requeridos
+            const tipoAtencion = document.getElementById('tipoAtencion').value;
+            const diagnostico = document.getElementById('diagnostico').value;
+            const tratamiento = document.getElementById('tratamiento').value;
+            const nuevoEstado = document.getElementById('nuevoEstado').value;
+            
+            if (!tipoAtencion || !diagnostico || !tratamiento || !nuevoEstado) {
+                showAlert('error', 'Por favor completa todos los campos requeridos (*)');
+                return;
+            }
+            
+            // Preparar datos
+            const attentionData = {
+                animal_id: currentAnimalId,
+                tipo_atencion: tipoAtencion,
+                diagnostico: diagnostico,
+                tratamiento: tratamiento,
+                medicamentos: document.getElementById('medicamentos').value || '',
+                proxima_cita: document.getElementById('proximaCita').value || null,
+                costo: document.getElementById('costo').value || 0,
+                nuevo_estado: nuevoEstado,
+                razon_estado: document.getElementById('razonEstado').value || 'Atención veterinaria'
+            };
+            
+            console.log('Enviando atención:', attentionData);
+            
+            try {
+                showLoading();
+                
+                const response = await fetch('/api/veterinario/atender', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(attentionData)
+                });
+                
+                const result = await response.json();
+                
+                hideLoading();
+                
+                if (response.ok) {
+                    showAlert('success', result.message || '✅ Atención registrada exitosamente');
+                    
+                    // Limpiar formulario
+                    document.getElementById('vetForm').reset();
+                    
+                    // Restaurar fechas por defecto
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('fechaAtencion').value = today;
+                    
+                    const nextWeek = new Date();
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+                    document.getElementById('proximaCita').value = nextWeek.toISOString().split('T')[0];
+                    
+                    // Ocultar formulario
+                    hideAttentionForm();
+                    
+                    // Recargar datos
+                    await Promise.all([
+                        loadDashboardStats(),
+                        loadAnimalsForCare()
+                    ]);
+                    
+                    // Volver al dashboard
+                    showVetTab('dashboard');
+                    
+                } else {
+                    showAlert('error', result.error || '❌ Error al guardar la atención');
+                }
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error:', error);
+                showAlert('error', '❌ Error de conexión con el servidor');
+            }
+        }
+        
+        // ================= CAMBIO RÁPIDO DE ESTADO =================
+        function openStateModal(animalId, animalName, estadoActual) {
+            currentAnimalId = animalId;
+            currentAnimalName = animalName;
+            currentAnimalEstado = estadoActual;
+            
+            document.getElementById('modalAnimalInfo').textContent = 
+                `Cambiar estado de "${animalName}" (Estado actual: ${estadoActual})`;
+            
+            document.getElementById('stateModal').style.display = 'flex';
+        }
+        
+        function closeStateModal() {
+            document.getElementById('stateModal').style.display = 'none';
+            document.getElementById('modalRazon').value = '';
+            currentAnimalId = null;
+            currentAnimalName = null;
+            currentAnimalEstado = null;
+        }
+        
+        function quickSetState(estado) {
+            const razonInput = document.getElementById('modalRazon');
+            
+            // Sugerir razones basadas en el estado seleccionado
+            switch(estado) {
+                case 'disponible':
+                    if (!razonInput.value) {
+                        razonInput.value = 'Animal saludable, listo para adopción';
+                    }
+                    break;
+                case 'tratamiento':
+                    if (!razonInput.value) {
+                        razonInput.value = 'Requiere atención veterinaria';
+                    }
+                    break;
+                case 'reservado':
+                    if (!razonInput.value) {
+                        razonInput.value = 'En proceso de adopción';
+                    }
+                    break;
+            }
+        }
+        
+        async function saveQuickState() {
+            const nuevoEstado = document.querySelector('.state-option[style*="background"]')?.onclick?.toString().match(/'([^']+)'/)?.[1];
+            const razon = document.getElementById('modalRazon').value;
+            
+            if (!nuevoEstado) {
+                showAlert('error', 'Selecciona un estado primero');
+                return;
+            }
+            
+            if (!currentAnimalId) {
+                showAlert('error', 'No hay animal seleccionado');
+                return;
+            }
+            
+            try {
+                showLoading();
+                
+                const response = await fetch(`/api/veterinario/estado/${currentAnimalId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nuevo_estado: nuevoEstado,
+                        razon: razon || `Cambio a ${nuevoEstado}`
+                    })
+                });
+                
+                const result = await response.json();
+                
+                hideLoading();
+                
+                if (response.ok) {
+                    showAlert('success', result.message || `✅ Estado cambiado a ${nuevoEstado}`);
+                    closeStateModal();
+                    
+                    // Recargar datos
+                    await Promise.all([
+                        loadDashboardStats(),
+                        loadAnimalsForCare()
+                    ]);
+                    
+                } else {
+                    showAlert('error', result.error || '❌ Error al cambiar estado');
+                }
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error:', error);
+                showAlert('error', '❌ Error de conexión');
+            }
+        }
+        
+        // ================= HISTORIAL MÉDICO =================
+        async function loadAnimalOptions() {
+            try {
+                const response = await fetch('/api/veterinario/animales');
+                const animals = await response.json();
+                
+                const select = document.getElementById('filterHistorial');
+                select.innerHTML = '<option value="">Todos los animales</option>';
+                
+                animals.forEach(animal => {
+                    const option = document.createElement('option');
+                    option.value = animal.id;
+                    option.textContent = `${animal.nombre} (${animal.especie})`;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error cargando opciones:', error);
+            }
+        }
+        
+       async function loadMedicalHistory() {
+    const container = document.getElementById('medicalHistory');
+    const animalId = document.getElementById('filterHistorial').value;
+    
+    container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Cargando historial médico...</p></div>';
+    
+    try {
+        // Si hay un animal específico seleccionado
+        if (animalId) {
+            const response = await fetch(`/api/veterinario/historial/${animalId}`);
+            if (response.ok) {
+                const historial = await response.json();
+                
+                if (!Array.isArray(historial) || historial.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-file-medical"></i>
+                            <p>No hay registros médicos para este animal</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                displayHistorial(historial, container);
+                return;
+            }
+        }
+        
+        // Si no hay animal específico, obtener todos los animales
+        const animalsResponse = await fetch('/api/veterinario/animales?limit=10');
+        let animals = [];
+        
+        if (animalsResponse.ok) {
+            const data = await animalsResponse.json();
+            // Asegurar que sea array
+            animals = Array.isArray(data) ? data : [];
+        }
+        
+        if (animals.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>No hay animales disponibles</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Obtener historial de los primeros 3 animales
+        const historialPromises = animals.slice(0, 3).map(async animal => {
+            try {
+                const response = await fetch(`/api/veterinario/historial/${animal.id}`);
+                if (response.ok) {
+                    const animalHistorial = await response.json();
+                    if (Array.isArray(animalHistorial)) {
+                        return animalHistorial.map(item => ({
+                            ...item,
+                            animal_nombre: animal.nombre,
+                            animal_especie: animal.especie
+                        }));
+                    }
+                }
+                return [];
+            } catch (error) {
+                console.warn(`Error obteniendo historial para animal ${animal.id}:`, error);
+                return [];
+            }
+        });
+        
+        const historialArrays = await Promise.all(historialPromises);
+        const historial = historialArrays.flat();
+        
+        if (historial.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-medical"></i>
+                    <p>No hay registros médicos</p>
+                    <small>Los registros aparecerán aquí después de atender animales</small>
+                </div>
+            `;
+            return;
+        }
+        
+        // Ordenar por fecha
+        historial.sort((a, b) => {
+            const dateA = a.fecha_atencion || a.fecha_registro;
+            const dateB = b.fecha_atencion || b.fecha_registro;
+            return new Date(dateB) - new Date(dateA);
+        });
+        
+        displayHistorial(historial.slice(0, 10), container);
+        
+    } catch (error) {
+        console.error('Error cargando historial:', error);
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                <p>Error cargando historial médico</p>
+                <small>${error.message}</small>
+            </div>
+        `;
+    }
+}
+
+// Función auxiliar para mostrar historial
+function displayHistorial(historial, container) {
+    container.innerHTML = historial.map(item => {
+        const fecha = item.fecha_atencion || item.fecha_registro;
+        const fechaFormateada = fecha ? new Date(fecha).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }) : 'Fecha no disponible';
+        
+        return `
+            <div class="history-item">
+                <div class="history-header">
+                    <div class="history-date">
+                        <i class="fas fa-calendar"></i> ${fechaFormateada}
+                    </div>
+                    <span class="history-type">${item.tipo_atencion || 'Atención'}</span>
+                </div>
+                <div class="history-content">
+                    <p><strong>Animal:</strong> ${item.animal_nombre || 'No especificado'} (${item.animal_especie || item.especie || 'N/A'})</p>
+                    <p><strong>Diagnóstico:</strong> ${item.diagnostico || 'No especificado'}</p>
+                    <p><strong>Tratamiento:</strong> ${item.tratamiento || 'No especificado'}</p>
+                    ${item.medicamentos ? `<p><strong>Medicamentos:</strong> ${item.medicamentos}</p>` : ''}
+                    ${item.proxima_cita ? `<p><strong>Próxima cita:</strong> ${new Date(item.proxima_cita).toLocaleDateString('es-ES')}</p>` : ''}
+                    ${item.costo ? `<p><strong>Costo:</strong> $${parseFloat(item.costo).toFixed(2)}</p>` : ''}
+                    ${item.notas ? `<p><strong>Notas:</strong> ${item.notas}</p>` : ''}
+                    <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                        <i class="fas fa-user-md"></i> Atendido por: ${item.veterinario_nombre || 'Veterinario'}
+                    </p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+        
+        // ================= FUNCIONES AUXILIARES =================
+        function showVetTab(tabName) {
+            // Ocultar todas las tabs
+            document.querySelectorAll('.vet-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.vet-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar tab seleccionada
+            const tabId = `vet${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`;
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activar botón correspondiente
+            document.querySelectorAll('.vet-tab').forEach(btn => {
+                if (btn.textContent.includes(tabName.charAt(0).toUpperCase() + tabName.slice(1))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Cargar datos específicos de la tab
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboardStats();
+                    break;
+                case 'atender':
+                    loadAnimalsForCare();
+                    break;
+                case 'historial':
+                    loadMedicalHistory();
+                    break;
+            }
+        }
+        
+        async function viewAnimalDetails(animalId) {
+            try {
+                // Obtener todos los animales
+                const response = await fetch('/api/veterinario/animales');
+                const animals = await response.json();
+                
+                const animal = animals.find(a => a.id === animalId);
+                
+                if (!animal) {
+                    showAlert('error', 'Animal no encontrado');
+                    return;
+                }
+                
+                // Formatear fotos
+                let fotosHTML = '';
+                if (animal.fotos && animal.fotos.length > 0) {
+                    fotosHTML = `
+                        <div style="margin-top: 20px;">
+                            <h4><i class="fas fa-images"></i> Fotos</h4>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                ${animal.fotos.map(foto => 
+                                    `<img src="${foto}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #eee;" onerror="this.src='https://via.placeholder.com/120x120?text=Sin+imagen'">`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Determinar color del estado
+                let estadoColor = '';
+                switch(animal.estado) {
+                    case 'disponible': estadoColor = '#1B5E20'; break;
+                    case 'tratamiento': estadoColor = '#E65100'; break;
+                    case 'reservado': estadoColor = '#0D47A1'; break;
+                    case 'adoptado': estadoColor = '#4A148C'; break;
+                    default: estadoColor = '#666';
+                }
+                
+                const content = `
+                    <h2 style="color: #00695C; margin-bottom: 10px;">${animal.nombre}</h2>
+                    <p style="color: #666; margin-bottom: 25px;">
+                        <span style="background: ${estadoColor}; color: white; padding: 5px 12px; border-radius: 20px; font-size: 14px;">
+                            ${animal.estado || 'Estado no disponible'}
+                        </span>
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                        <div>
+                            <h4><i class="fas fa-info-circle"></i> Información básica</h4>
+                            <p><strong>Especie:</strong> ${animal.especie}</p>
+                            <p><strong>Raza:</strong> ${animal.raza || 'No especificada'}</p>
+                            <p><strong>Edad:</strong> ${animal.edad || 'No especificada'}</p>
+                            <p><strong>Sexo:</strong> ${animal.sexo === 'macho' ? 'Macho' : 'Hembra'}</p>
+                            <p><strong>Tamaño:</strong> ${animal.tamano || 'No especificado'}</p>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-map-marker-alt"></i> Ubicación y salud</h4>
+                            <p><strong>Ubicación:</strong> ${animal.ubicacion || 'No especificada'}</p>
+                            <p><strong>Estado de salud:</strong> ${animal.salud || 'Buena'}</p>
+                            <p><strong>Veterinario asignado:</strong> ${animal.veterinario_asignado || 'Sin asignar'}</p>
+                            <p><strong>Registrado:</strong> ${animal.creado_en ? new Date(animal.creado_en).toLocaleDateString('es-ES') : 'No disponible'}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4><i class="fas fa-file-alt"></i> Descripción</h4>
+                        <p>${animal.descripcion || 'Sin descripción disponible.'}</p>
+                    </div>
+                    
+                    ${fotosHTML}
+                    
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button onclick="attendAnimal(${animal.id}, '${animal.nombre}', '${animal.estado}')" 
+                                style="padding: 12px 25px; background: #00695C; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-stethoscope"></i> Atender este animal
+                        </button>
+                        <button onclick="closeDetailModal()" 
+                                style="padding: 12px 25px; background: #f5f5f5; color: #333; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailModal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error viendo detalles:', error);
+                showAlert('error', 'Error al cargar detalles del animal');
+            }
+        }
+        
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+        
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeDetailModal();
+                closeStateModal();
+            }
+        }
+        
+        // ================= UTILIDADES =================
+        function showAlert(type, message) {
+            // Crear alerta temporal
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 3000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease-out;
+                max-width: 400px;
+            `;
+            
+            if (type === 'success') {
+                alertDiv.style.background = '#4CAF50';
+            } else if (type === 'error') {
+                alertDiv.style.background = '#F44336';
+            } else {
+                alertDiv.style.background = '#2196F3';
+            }
+            
+            alertDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                alertDiv.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.parentNode.removeChild(alertDiv);
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        function showLoading() {
+            // Podrías implementar un overlay de carga aquí
+            console.log('Mostrando loading...');
+        }
+        
+        function hideLoading() {
+            console.log('Ocultando loading...');
+        }
+        
+        // Estilos CSS para animaciones de alertas
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

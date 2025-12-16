@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Sistema Animal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #2c3e50, #4a235a);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card h3 {
+            margin: 10px 0;
+            font-size: 2em;
+            color: #2c3e50;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #d0d0d0;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .estado-revisado {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .estado-resuelto {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .estado-aprobada {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .estado-rechazada {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .btn-action {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .admin-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-admin {
+            padding: 10px 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-admin:hover {
+            background: #1a252f;
+        }
+        
+        .animal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .animal-card-admin {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            transition: transform 0.3s;
+        }
+        
+        .animal-card-admin:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .animal-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .animal-info {
+            padding: 15px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+    <h1><i class="fas fa-crown"></i> Panel de Administración</h1>
+    <p id="admin-info">Cargando información...</p>
+    <!-- AGREGAR ESTOS DOS BOTONES -->
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button onclick="window.location.href='/dashboard'" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <i class="fas fa-home"></i> Volver al Inicio
+        </button>
+        <button onclick="logout()" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+    </div>
+</div>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-crown"></i> Panel de Administración</h1>
+            <p id="admin-info">Cargando información...</p>
+            <button onclick="logout()" class="btn-admin">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="admin-stats" id="stats-container">
+            <!-- Las estadísticas se cargarán con JavaScript -->
+        </div>
+        
+        <!-- Pestañas -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="showTab('reportes')">
+                <i class="fas fa-flag"></i> Reportes
+            </button>
+            <button class="tab-btn" onclick="showTab('animales')">
+                <i class="fas fa-paw"></i> Animales
+            </button>
+            <button class="tab-btn" onclick="showTab('adopciones')">
+                <i class="fas fa-home"></i> Adopciones
+            </button>
+            <button class="tab-btn" onclick="showTab('veterinarios')">
+                <i class="fas fa-user-md"></i> Veterinarios
+            </button>
+            <button class="tab-btn" onclick="showTab('usuarios')">
+                <i class="fas fa-users"></i> Usuarios
+            </button>
+        </div>
+        
+        <!-- Contenido de pestañas -->
+        <div id="tab-reportes" class="tab-content active">
+            <h2><i class="fas fa-flag"></i> Reportes Pendientes</h2>
+            <div id="reportes-container">
+                <p>Cargando reportes...</p>
+            </div>
+        </div>
+        
+        <div id="tab-animales" class="tab-content">
+            <h2><i class="fas fa-paw"></i> Gestionar Animales</h2>
+            <button onclick="showAddAnimalModal()" class="btn-admin">
+                <i class="fas fa-plus"></i> Agregar Nuevo Animal
+            </button>
+            <div id="animales-container">
+                <p>Cargando animales...</p>
+            </div>
+        </div>
+        
+        <div id="tab-adopciones" class="tab-content">
+            <h2><i class="fas fa-home"></i> Solicitudes de Adopción</h2>
+            <div id="adopciones-container">
+                <p>Cargando solicitudes...</p>
+            </div>
+        </div>
+        
+        <div id="tab-veterinarios" class="tab-content">
+            <h2><i class="fas fa-user-md"></i> Solicitudes de Veterinarios</h2>
+            <div id="veterinarios-container">
+                <p>Cargando solicitudes...</p>
+            </div>
+        </div>
+        
+        <div id="tab-usuarios" class="tab-content">
+            <h2><i class="fas fa-users"></i> Usuarios Registrados</h2>
+            <button onclick="loadUsuarios()" class="btn-admin">
+                <i class="fas fa-sync"></i> Actualizar Lista
+            </button>
+            <div id="usuarios-container">
+                <p>Cargando usuarios...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar animal -->
+    <div id="addAnimalModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddAnimalModal()">&times;</span>
+            <h2>Agregar Nuevo Animal</h2>
+            <form id="addAnimalForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Especie:</label>
+                    <select name="especie" required>
+                        <option value="perro">Perro</option>
+                        <option value="gato">Gato</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Raza:</label>
+                    <input type="text" name="raza">
+                </div>
+                <div class="form-group">
+                    <label>Edad (años):</label>
+                    <input type="number" name="edad" min="0" max="30">
+                </div>
+                <div class="form-group">
+                    <label>Sexo:</label>
+                    <select name="sexo" required>
+                        <option value="macho">Macho</option>
+                        <option value="hembra">Hembra</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tamaño:</label>
+                    <select name="tamano">
+                        <option value="pequeño">Pequeño</option>
+                        <option value="mediano">Mediano</option>
+                        <option value="grande">Grande</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <textarea name="descripcion" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Estado de salud:</label>
+                    <textarea name="salud" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ubicación:</label>
+                    <input type="text" name="ubicacion">
+                </div>
+                <div class="form-group">
+                    <label>Fotos (máx. 5):</label>
+                    <input type="file" name="fotos" multiple accept="image/*">
+                </div>
+                <button type="submit" class="btn-admin">
+                    <i class="fas fa-save"></i> Guardar Animal
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para ver detalles -->
+    <div id="detailModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeDetailModal()">&times;</span>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+    
+    <!-- Modal para ver experiencia veterinario -->
+    <div id="veterinarioModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeVeterinarioModal()">&times;</span>
+            <h3 id="veterinarioTitle"></h3>
+            <div id="veterinarioContent"></div>
+        </div>
+    </div>
+    
+    <script src="js/main.js"></script>
+    <script>
+        let currentAdmin = null;
+        
+        // Verificar sesión y permisos al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAccess();
+            loadStats();
+            loadReportes();
+        });
+        
+        // Verificar si es administrador - CORREGIDO
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch('/api/admin/check');
+                if (!response.ok) {
+                    alert('No tienes permisos de administrador');
+                    window.location.href = '/dashboard';
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.isAdmin) {
+                    currentAdmin = data.user;
+                    document.getElementById('admin-info').innerHTML = `
+                        <strong>${currentAdmin.nombre}</strong> (Administrador) 
+                        <br>Email: ${currentAdmin.email}
+                    `;
+                } else {
+                    alert('No tienes permisos de administrador');
+                    window.location.href = '/dashboard';
+                }
+            } catch (error) {
+                console.error('Error verificando admin:', error);
+                alert('Error al verificar permisos');
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/estadisticas');
+                const stats = await response.json();
+                
+                const statsHTML = `
+                    <div class="stat-card" style="border-left: 5px solid #3498db;">
+                        <i class="fas fa-paw" style="color: #3498db;"></i>
+                        <h3>${stats.total_animales}</h3>
+                        <p>Animales Totales</p>
+                    </div>
+                    <div class="stat-card" style="border-left: 5px solid #2ecc71;">
+                        <i class="fas fa-heart" style="color: #2ecc71;"></i>
+                        <h3>${stats.animales_disponibles}</h3>
+                        <p>Disponibles</p>
+                    </div>
+                    <div class="stat-card" style="border-left: 5px solid #9b59b6;">
+                        <i class="fas fa-home" style="color: #9b59b6;"></i>
+                        <h3>${stats.animales_adoptados}</h3>
+                        <p>Adoptados</p>
+                    </div>
+                    <div class="stat-card" style="border-left: 5px solid #e74c3c;">
+                        <i class="fas fa-flag" style="color: #e74c3c;"></i>
+                        <h3>${stats.reportes_pendientes}</h3>
+                        <p>Reportes Pendientes</p>
+                    </div>
+                    <div class="stat-card" style="border-left: 5px solid #f39c12;">
+                        <i class="fas fa-file-alt" style="color: #f39c12;"></i>
+                        <h3>${stats.adopciones_pendientes}</h3>
+                        <p>Adopciones Pendientes</p>
+                    </div>
+                    <div class="stat-card" style="border-left: 5px solid #1abc9c;">
+                        <i class="fas fa-user-md" style="color: #1abc9c;"></i>
+                        <h3>${stats.veterinarios_pendientes}</h3>
+                        <p>Solicitudes Veterinarios</p>
+                    </div>
+                `;
+                
+                document.getElementById('stats-container').innerHTML = statsHTML;
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+        
+        // Funciones para pestañas
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Actualizar botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Cargar datos según la pestaña
+            switch(tabName) {
+                case 'reportes':
+                    loadReportes();
+                    break;
+                case 'animales':
+                    loadAnimales();
+                    break;
+                case 'adopciones':
+                    loadAdopciones();
+                    break;
+                case 'veterinarios':
+                    loadVeterinarios();
+                    break;
+                case 'usuarios':
+                    loadUsuarios();
+                    break;
+            }
+        }
+        
+        // Cargar reportes - CORREGIDO
+        async function loadReportes() {
+            try {
+                const response = await fetch('/api/admin/reportes');
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta');
+                }
+                const reportes = await response.json();
+                
+                if (reportes.length === 0) {
+                    document.getElementById('reportes-container').innerHTML = 
+                        '<p>No hay reportes pendientes.</p>';
+                    return;
+                }
+                
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Usuario</th>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                reportes.forEach(reporte => {
+                    const fecha = new Date(reporte.fecha_reporte).toLocaleDateString();
+                    let estadoClass = '';
+                    
+                    switch(reporte.estado) {
+                        case 'pendiente': estadoClass = 'estado-pendiente'; break;
+                        case 'revisado': estadoClass = 'estado-revisado'; break;
+                        case 'resuelto': estadoClass = 'estado-resuelto'; break;
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td>${reporte.id}</td>
+                            <td>${reporte.titulo}</td>
+                            <td>${reporte.usuario_nombre || 'Anónimo'}</td>
+                            <td>${reporte.tipo_reporte || reporte.tipo || 'N/A'}</td>
+                            <td>${fecha}</td>
+                            <td><span class="${estadoClass}">${reporte.estado}</span></td>
+                            <td>
+                                <button class="btn-action btn-view" onclick="viewReporte(${reporte.id})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${reporte.estado === 'pendiente' ? `
+                                    <button class="btn-action btn-approve" onclick="updateReporte(${reporte.id}, 'revisado')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-action btn-reject" onclick="updateReporte(${reporte.id}, 'resuelto')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('reportes-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando reportes:', error);
+                document.getElementById('reportes-container').innerHTML = 
+                    '<p>Error cargando reportes. Intenta de nuevo.</p>';
+            }
+        }
+        
+        // Ver detalles de reporte
+        async function viewReporte(id) {
+            try {
+                const response = await fetch('/api/admin/reportes');
+                const reportes = await response.json();
+                const reporte = reportes.find(r => r.id === id);
+                
+                if (reporte) {
+                    let fotosHTML = '';
+                    if (reporte.fotos) {
+                        try {
+                            const fotos = JSON.parse(reporte.fotos);
+                            fotosHTML = fotos.map(foto => 
+                                `<img src="${foto}" style="max-width: 200px; margin: 5px; border-radius: 5px;">`
+                            ).join('');
+                        } catch (e) {
+                            fotosHTML = '<p>Error cargando fotos</p>';
+                        }
+                    }
+                    
+                    const content = `
+                        <h3>${reporte.titulo}</h3>
+                        <p><strong>Usuario:</strong> ${reporte.usuario_nombre || 'Anónimo'}</p>
+                        <p><strong>Tipo:</strong> ${reporte.tipo_reporte || reporte.tipo || 'N/A'}</p>
+                        <p><strong>Ubicación:</strong> ${reporte.ubicacion || 'No especificada'}</p>
+                        <p><strong>Fecha:</strong> ${new Date(reporte.fecha_reporte).toLocaleString()}</p>
+                        <p><strong>Estado:</strong> ${reporte.estado}</p>
+                        <p><strong>Descripción:</strong></p>
+                        <p>${reporte.descripcion}</p>
+                        ${fotosHTML ? `<p><strong>Fotos:</strong></p><div>${fotosHTML}</div>` : ''}
+                        ${reporte.notas_admin ? `<p><strong>Notas del admin:</strong><br>${reporte.notas_admin}</p>` : ''}
+                        
+                        <div style="margin-top: 20px;">
+                            <textarea id="notasAdmin" placeholder="Agregar notas..." rows="3" style="width: 100%; padding: 10px;"></textarea>
+                            <div style="margin-top: 10px;">
+                                <button onclick="updateReporte(${id}, 'revisado')" class="btn-approve">
+                                    <i class="fas fa-check"></i> Marcar como Revisado
+                                </button>
+                                <button onclick="updateReporte(${id}, 'resuelto')" class="btn-reject">
+                                    <i class="fas fa-times"></i> Marcar como Resuelto
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('detail-content').innerHTML = content;
+                    document.getElementById('detailModal').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error viendo reporte:', error);
+                alert('Error al cargar detalles del reporte');
+            }
+        }
+        
+        // Actualizar estado de reporte
+        async function updateReporte(id, estado) {
+            try {
+                const notas = document.getElementById('notasAdmin') ? 
+                    document.getElementById('notasAdmin').value : '';
+                
+                const response = await fetch(`/api/admin/reportes/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        estado: estado,
+                        notas_admin: notas
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Reporte actualizado correctamente');
+                    closeDetailModal();
+                    loadReportes();
+                    loadStats();
+                } else {
+                    alert('Error actualizando reporte');
+                }
+            } catch (error) {
+                console.error('Error actualizando reporte:', error);
+                alert('Error de conexión');
+            }
+        }
+        
+        // Cargar animales - MEJORADO
+        async function loadAnimales() {
+            try {
+                const response = await fetch('/api/animales');
+                const animales = await response.json();
+                
+                if (animales.length === 0) {
+                    document.getElementById('animales-container').innerHTML = 
+                        '<p>No hay animales registrados.</p>';
+                    return;
+                }
+                
+                let html = `
+                    <div class="animal-grid">
+                `;
+                
+                animales.forEach(animal => {
+                    let fotoPrincipal = 'https://via.placeholder.com/300x200?text=Sin+imagen';
+                    if (animal.fotos && animal.fotos.length > 0) {
+                        fotoPrincipal = animal.fotos[0];
+                    } else if (animal.fotos && typeof animal.fotos === 'string') {
+                        try {
+                            const fotos = JSON.parse(animal.fotos);
+                            if (fotos && fotos.length > 0) {
+                                fotoPrincipal = fotos[0];
+                            }
+                        } catch (e) {
+                            // Si falla el parse, usar placeholder
+                        }
+                    }
+                    
+                    html += `
+                        <div class="animal-card-admin">
+                            <img src="${fotoPrincipal}" alt="${animal.nombre}" class="animal-img" 
+                                 onerror="this.src='https://via.placeholder.com/300x200?text=Sin+imagen'">
+                            <div class="animal-info">
+                                <h3 style="margin: 0 0 10px 0;">${animal.nombre}</h3>
+                                <p style="margin: 5px 0;"><strong>Especie:</strong> ${animal.especie}</p>
+                                <p style="margin: 5px 0;"><strong>Edad:</strong> ${animal.edad || '?'} años</p>
+                                <p style="margin: 5px 0;"><strong>Estado:</strong> ${animal.estado}</p>
+                                <p style="margin: 5px 0;"><strong>Ubicación:</strong> ${animal.ubicacion || 'No especificada'}</p>
+                                <div style="margin-top: 10px;">
+                                    <button onclick="deleteAnimal(${animal.id})" class="btn-action btn-reject">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                document.getElementById('animales-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando animales:', error);
+                document.getElementById('animales-container').innerHTML = 
+                    '<p>Error cargando animales. Intenta de nuevo.</p>';
+            }
+        }
+        
+        // Eliminar animal
+        async function deleteAnimal(id) {
+            if (confirm('¿Estás seguro de eliminar este animal?')) {
+                try {
+                    const response = await fetch(`/api/admin/animales/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        alert('Animal eliminado correctamente');
+                        loadAnimales();
+                        loadStats();
+                    } else {
+                        alert('Error eliminando animal');
+                    }
+                } catch (error) {
+                    console.error('Error eliminando animal:', error);
+                    alert('Error de conexión');
+                }
+            }
+        }
+        
+        // Funciones para modales
+        function showAddAnimalModal() {
+            document.getElementById('addAnimalModal').style.display = 'flex';
+        }
+        
+        function closeAddAnimalModal() {
+            document.getElementById('addAnimalModal').style.display = 'none';
+        }
+        
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+        
+        function closeVeterinarioModal() {
+            document.getElementById('veterinarioModal').style.display = 'none';
+        }
+        
+        // Formulario para agregar animal - CORREGIDO
+        document.getElementById('addAnimalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/api/admin/animales', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Animal agregado exitosamente');
+                    closeAddAnimalModal();
+                    this.reset();
+                    loadAnimales();
+                    loadStats();
+                } else {
+                    alert('Error al agregar animal: ' + (result.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error agregando animal:', error);
+                alert('Error de conexión al servidor');
+            }
+        });
+        
+        // Cargar adopciones pendientes
+        async function loadAdopciones() {
+            try {
+                const response = await fetch('/api/admin/adopciones');
+                const adopciones = await response.json();
+                
+                if (adopciones.length === 0) {
+                    document.getElementById('adopciones-container').innerHTML = 
+                        '<p>No hay solicitudes de adopción pendientes.</p>';
+                    return;
+                }
+                
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Animal</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                adopciones.forEach(adopcion => {
+                    const fecha = new Date(adopcion.fecha_solicitud).toLocaleDateString();
+                    let estadoClass = adopcion.estado === 'pendiente' ? 'estado-pendiente' : 
+                                     adopcion.estado === 'aprobada' ? 'estado-aprobada' : 'estado-rechazada';
+                    
+                    html += `
+                        <tr>
+                            <td>${adopcion.id}</td>
+                            <td>${adopcion.usuario_nombre}</td>
+                            <td>${adopcion.animal_nombre} (${adopcion.especie})</td>
+                            <td>${fecha}</td>
+                            <td><span class="${estadoClass}">${adopcion.estado}</span></td>
+                            <td>
+                               <button class="btn-action btn-view" onclick="viewAdopcion(${adopcion.id})">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                                ${adopcion.estado === 'pendiente' ? `
+                                    <button class="btn-action btn-approve" onclick="aprobarAdopcion(${adopcion.id})">
+                                        <i class="fas fa-check"></i> Aprobar
+                                    </button>
+                                    <button class="btn-action btn-reject" onclick="rechazarAdopcion(${adopcion.id})">
+                                        <i class="fas fa-times"></i> Rechazar
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('adopciones-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando adopciones:', error);
+                document.getElementById('adopciones-container').innerHTML = 
+                    '<p>Error cargando adopciones. Intenta de nuevo.</p>';
+            }
+        }
+        
+        // Funciones para adopciones
+        async function aprobarAdopcion(id) {
+            if (confirm('¿Estás seguro de aprobar esta adopción?')) {
+                await procesarAdopcion(id, 'aprobada');
+            }
+        }
+        
+        async function rechazarAdopcion(id) {
+            if (confirm('¿Estás seguro de rechazar esta adopción?')) {
+                await procesarAdopcion(id, 'rechazada');
+            }
+        }
+        
+        async function procesarAdopcion(id, estado) {
+            try {
+                const response = await fetch(`/api/admin/adopciones/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ estado: estado })
+                });
+                
+                if (response.ok) {
+                    alert(`Adopción ${estado} correctamente`);
+                    loadAdopciones();
+                    loadStats();
+                } else {
+                    alert('Error procesando adopción');
+                }
+            } catch (error) {
+                console.error('Error procesando adopción:', error);
+                alert('Error de conexión');
+            }
+        }
+        
+        // Cargar solicitudes de veterinarios - NUEVA FUNCIÓN COMPLETA
+        async function loadVeterinarios() {
+            try {
+                const response = await fetch('/api/admin/solicitudes-veterinario');
+                const solicitudes = await response.json();
+                
+                if (solicitudes.length === 0) {
+                    document.getElementById('veterinarios-container').innerHTML = 
+                        '<p>No hay solicitudes de veterinario pendientes.</p>';
+                    return;
+                }
+                
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Especialidad</th>
+                                <th>Fecha</th>
+                                <th>Experiencia</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                solicitudes.forEach(solicitud => {
+                    const fecha = new Date(solicitud.fecha_solicitud).toLocaleDateString();
+                    
+                    html += `
+                        <tr>
+                            <td>${solicitud.id}</td>
+                            <td>${solicitud.nombre}</td>
+                            <td>${solicitud.email}</td>
+                            <td>${solicitud.especialidad || 'No especificada'}</td>
+                            <td>${fecha}</td>
+                            <td>
+                                <button class="btn-action btn-view" onclick="viewExperienciaVeterinario(${solicitud.id})">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn-action btn-approve" onclick="aprobarVeterinario(${solicitud.id})">
+                                    <i class="fas fa-check"></i> Aprobar
+                                </button>
+                                <button class="btn-action btn-reject" onclick="rechazarVeterinario(${solicitud.id})">
+                                    <i class="fas fa-times"></i> Rechazar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('veterinarios-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando veterinarios:', error);
+                document.getElementById('veterinarios-container').innerHTML = 
+                    '<p>Error cargando solicitudes. Intenta de nuevo.</p>';
+            }
+        }
+        
+        // Ver experiencia de veterinario
+        async function viewExperienciaVeterinario(id) {
+            try {
+                const response = await fetch('/api/admin/solicitudes-veterinario');
+                const solicitudes = await response.json();
+                const solicitud = solicitudes.find(s => s.id === id);
+                
+                if (solicitud) {
+                    document.getElementById('veterinarioTitle').textContent = `Experiencia de ${solicitud.nombre}`;
+                    document.getElementById('veterinarioContent').innerHTML = `
+                        <p><strong>Email:</strong> ${solicitud.email}</p>
+                        <p><strong>Teléfono:</strong> ${solicitud.telefono || 'No proporcionado'}</p>
+                        <p><strong>Especialidad:</strong> ${solicitud.especialidad || 'No especificada'}</p>
+                        <p><strong>Fecha de solicitud:</strong> ${new Date(solicitud.fecha_solicitud).toLocaleString()}</p>
+                        <p><strong>Experiencia:</strong></p>
+                        <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                            ${solicitud.experiencia || 'No proporcionada'}
+                        </div>
+                    `;
+                    document.getElementById('veterinarioModal').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error viendo experiencia:', error);
+                alert('Error al cargar información del veterinario');
+            }
+        }
+        
+        // Funciones para veterinarios
+        async function aprobarVeterinario(id) {
+            if (confirm('¿Estás seguro de aprobar este veterinario?')) {
+                await procesarVeterinario(id, 'aprobada');
+            }
+        }
+        
+        async function rechazarVeterinario(id) {
+            if (confirm('¿Estás seguro de rechazar este veterinario?')) {
+                await procesarVeterinario(id, 'rechazada');
+            }
+        }
+        
+        async function procesarVeterinario(id, estado) {
+            try {
+                const response = await fetch(`/api/admin/solicitudes-veterinario/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ estado: estado })
+                });
+                
+                if (response.ok) {
+                    alert(`Solicitud ${estado} correctamente`);
+                    loadVeterinarios();
+                    loadStats();
+                } else {
+                    alert('Error procesando solicitud');
+                }
+            } catch (error) {
+                console.error('Error procesando solicitud:', error);
+                alert('Error de conexión');
+            }
+        }
+        
+        // Cargar usuarios - NUEVA FUNCIÓN
+        async function loadUsuarios() {
+            try {
+                const response = await fetch('/api/admin/usuarios');
+                const usuarios = await response.json();
+                
+                if (usuarios.length === 0) {
+                    document.getElementById('usuarios-container').innerHTML = 
+                        '<p>No hay usuarios registrados.</p>';
+                    return;
+                }
+                
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Tipo</th>
+                                <th>Fecha Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                usuarios.forEach(usuario => {
+                    const fecha = new Date(usuario.fecha_registro).toLocaleDateString();
+                    
+                    html += `
+                        <tr>
+                            <td>${usuario.id}</td>
+                            <td>${usuario.nombre}</td>
+                            <td>${usuario.email}</td>
+                            <td>${usuario.telefono || 'No proporcionado'}</td>
+                            <td><span class="${usuario.tipo === 'admin' ? 'estado-aprobada' : 
+                                            usuario.tipo === 'veterinario' ? 'estado-revisado' : 
+                                            'estado-pendiente'}">${usuario.tipo}</span></td>
+                            <td>${fecha}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('usuarios-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                document.getElementById('usuarios-container').innerHTML = 
+                    '<p>Error cargando usuarios. Intenta de nuevo.</p>';
+            }
+        }
+
+        // ================= FUNCIÓN PARA VER DETALLES DE ADOPCIÓN =================
+
+// Esta función se llama cuando haces clic en el "ojito"
+async function viewAdopcion(adopcionId) {
+    console.log('👁️ Ver detalles adopción:', adopcionId);
+    
+    try {
+        // Obtener detalles de la adopción
+        const response = await fetch(`/api/admin/adopciones/${adopcionId}`);
+        
+        if (!response.ok) {
+            throw new Error('Error al obtener detalles');
+        }
+        
+        const adopcion = await response.json();
+        
+        // Formatear fecha
+        const fechaSolicitud = new Date(adopcion.fecha_solicitud).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Crear contenido del modal
+        const content = `
+            <div style="max-width: 800px;">
+                <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+                    <i class="fas fa-home"></i> Solicitud de Adopción #${adopcion.id}
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0;">
+                    <div>
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">
+                            <i class="fas fa-user"></i> Información del Solicitante
+                        </h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            <p><strong>Nombre:</strong> ${adopcion.usuario_nombre || 'No especificado'}</p>
+                            <p><strong>Email:</strong> ${adopcion.usuario_email || 'No especificado'}</p>
+                            <p><strong>Teléfono:</strong> ${adopcion.usuario_telefono || 'No especificado'}</p>
+                            <p><strong>Fecha solicitud:</strong> ${fechaSolicitud}</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">
+                            <i class="fas fa-paw"></i> Información del Animal
+                        </h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            <p><strong>Nombre:</strong> ${adopcion.animal_nombre || 'No especificado'}</p>
+                            <p><strong>Especie:</strong> ${adopcion.especie || 'No especificado'}</p>
+                            <p><strong>Raza:</strong> ${adopcion.raza || 'No especificada'}</p>
+                            <p><strong>Edad:</strong> ${adopcion.edad || 'No especificada'}</p>
+                            <p><strong>Sexo:</strong> ${adopcion.sexo === 'macho' ? 'Macho' : 'Hembra'}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin: 25px 0;">
+                    <h3 style="color: #2c3e50; margin-bottom: 15px;">
+                        <i class="fas fa-file-alt"></i> Detalles de la Solicitud
+                    </h3>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <p><strong>Motivo de adopción:</strong></p>
+                        <div style="background: white; padding: 15px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #3498db;">
+                            ${adopcion.motivo || 'No especificado'}
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                            <div>
+                                <p><strong>Tipo de vivienda:</strong> ${adopcion.vivienda || 'No especificado'}</p>
+                                <p><strong>Experiencia previa:</strong> ${adopcion.experiencia || 'No especificada'}</p>
+                            </div>
+                            <div>
+                                <p><strong>Tiene otros animales:</strong> ${adopcion.tiene_otros_animales ? 'Sí' : 'No'}</p>
+                                <p><strong>Estado:</strong> 
+                                    <span class="estado-${adopcion.estado || 'pendiente'}" style="display: inline-block;">
+                                        ${adopcion.estado || 'pendiente'}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: flex-end;">
+                    <button onclick="closeDetailModal()" 
+                            style="padding: 12px 25px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    
+                    ${adopcion.estado === 'pendiente' ? `
+                        <button onclick="aprobarAdopcion(${adopcion.id})" 
+                                style="padding: 12px 25px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-check"></i> Aprobar
+                        </button>
+                        <button onclick="rechazarAdopcion(${adopcion.id})" 
+                                style="padding: 12px 25px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-times"></i> Rechazar
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        // Mostrar en el modal
+        document.getElementById('detail-content').innerHTML = content;
+        document.getElementById('detailModal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('Error viendo adopción:', error);
+        alert('❌ Error al cargar los detalles de la adopción');
+    }
+}
+
+// Función para aprobar adopción (ya la tienes, pero asegúrate que cierre el modal)
+async function aprobarAdopcion(id) {
+    if (confirm('¿Estás seguro de aprobar esta solicitud de adopción?')) {
+        try {
+            const response = await fetch(`/api/admin/adopciones/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: 'aprobada' })
+            });
+            
+            if (response.ok) {
+                alert('✅ Solicitud aprobada exitosamente');
+                closeDetailModal();  // <-- AÑADE ESTA LÍNEA
+                loadAdopciones();
+                loadStats();
+            } else {
+                throw new Error('Error al aprobar');
+            }
+        } catch (error) {
+            alert('❌ Error al aprobar la solicitud');
+        }
+    }
+}
+
+// Función para rechazar adopción (añade cierre de modal)
+async function rechazarAdopcion(id) {
+    if (confirm('¿Estás seguro de rechazar esta solicitud de adopción?')) {
+        try {
+            const response = await fetch(`/api/admin/adopciones/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: 'rechazada' })
+            });
+            
+            if (response.ok) {
+                alert('❌ Solicitud rechazada');
+                closeDetailModal();  // <-- AÑADE ESTA LÍNEA
+                loadAdopciones();
+                loadStats();
+            } else {
+                throw new Error('Error al rechazar');
+            }
+        } catch (error) {
+            alert('❌ Error al rechazar la solicitud');
+        }
+    }
+}
+        // Cerrar sesión
+        async function logout() {
+            try {
+                const response = await fetch('/api/logout');
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect;
+                }
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Cerrar modales haciendo clic fuera
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addAnimalModal');
+            const detailModal = document.getElementById('detailModal');
+            const vetModal = document.getElementById('veterinarioModal');
+            
+            if (event.target === addModal) {
+                closeAddAnimalModal();
+            }
+            if (event.target === detailModal) {
+                closeDetailModal();
+            }
+            if (event.target === vetModal) {
+                closeVeterinarioModal();
+            }
+        }
+    </script>
+</body>
+</html>

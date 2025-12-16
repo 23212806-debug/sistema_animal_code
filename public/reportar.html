@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar Abuso - Sistema Animal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .report-header {
+            background: linear-gradient(rgba(244, 67, 54, 0.9), rgba(183, 28, 28, 0.9)), url('https://images.unsplash.com/photo-1596273315327-5f059f216e4c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .report-container {
+            max-width: 800px;
+            margin: 0 auto 50px;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ddd;
+            z-index: 1;
+        }
+        
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: #ddd;
+            color: #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+        }
+        
+        .step.active .step-number {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: #4CAF50;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-option {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .radio-option input {
+            display: none;
+        }
+        
+        .radio-option label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .radio-option input:checked + label {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #4CAF50;
+        }
+        
+        .file-upload i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .file-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .preview-item {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-file {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn-prev, .btn-next, .btn-submit {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-prev {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .btn-prev:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-next, .btn-submit {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-next:hover, .btn-submit:hover {
+            background: #3d8b40;
+        }
+        
+        .btn-submit {
+            background: #2196F3;
+        }
+        
+        .btn-submit:hover {
+            background: #0b7dda;
+        }
+        
+        .privacy-notice {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #1565c0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/dashboard" class="navbar-brand">
+                <i class="fas fa-paw"></i> Sistema Animal
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="/animales.html" class="nav-link"><i class="fas fa-dog"></i> Animales</a></li>
+                <li><a href="/reportar.html" class="nav-link active"><i class="fas fa-exclamation-triangle"></i> Reportar</a></li>
+                <li><button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="report-header">
+        <div class="container">
+            <h1><i class="fas fa-exclamation-triangle"></i> Reportar Abuso Animal</h1>
+            <p>Tu denuncia puede salvar una vida. Reporta con responsabilidad</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="report-container">
+            <div class="step-indicator">
+                <div class="step active" id="step1-indicator">
+                    <div class="step-number">1</div>
+                    <div>Tipo de Reporte</div>
+                </div>
+                <div class="step" id="step2-indicator">
+                    <div class="step-number">2</div>
+                    <div>Información</div>
+                </div>
+                <div class="step" id="step3-indicator">
+                    <div class="step-number">3</div>
+                    <div>Evidencia</div>
+                </div>
+                <div class="step" id="step4-indicator">
+                    <div class="step-number">4</div>
+                    <div>Confirmar</div>
+                </div>
+            </div>
+            
+            <div id="alertMessage" class="alert" style="display: none;"></div>
+            
+            <form id="reportForm">
+                <!-- Paso 1: Tipo de reporte -->
+                <div class="form-step active" id="step1">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Tipo de Situación</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="tipo_abuso" name="tipo" value="abuso" checked>
+                                <label for="tipo_abuso">
+                                    <i class="fas fa-fist-raised fa-2x"></i><br>
+                                    Abuso<br>
+                                    <small>Maltrato físico</small>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="tipo_abandono" name="tipo" value="abandono">
+                                <label for="tipo_abandono">
+                                    <i class="fas fa-home fa-2x"></i><br>
+                                    Abandono<br>
+                                    <small>Animal desamparado</small>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="tipo_maltrato" name="tipo" value="maltrato">
+                                <label for="tipo_maltrato">
+                                    <i class="fas fa-ban fa-2x"></i><br>
+                                    Negligencia<br>
+                                    <small>Cuidado inadecuado</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-exclamation-circle"></i> Gravedad</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="gravedad_baja" name="gravedad" value="baja">
+                                <label for="gravedad_baja">Baja</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="gravedad_media" name="gravedad" value="media" checked>
+                                <label for="gravedad_media">Media</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="gravedad_alta" name="gravedad" value="alta">
+                                <label for="gravedad_alta">Alta</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <div></div>
+                        <button type="button" class="btn-next" onclick="nextStep(2)">Siguiente <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Paso 2: Información -->
+                <div class="form-step" id="step2">
+                    <div class="form-group">
+                        <label for="titulo"><i class="fas fa-heading"></i> Título del Reporte</label>
+                        <input type="text" id="titulo" name="titulo" required placeholder="Ej: Perro maltratado en calle principal">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion"><i class="fas fa-file-alt"></i> Descripción Detallada</label>
+                        <textarea id="descripcion" name="descripcion" rows="5" required 
+                                  placeholder="Describe la situación con detalle: ¿Qué sucedió? ¿Dónde? ¿Cuándo? ¿Quién está involucrado?">
+                        </textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ubicacion"><i class="fas fa-map-marker-alt"></i> Ubicación Exacta</label>
+                        <input type="text" id="ubicacion" name="ubicacion" required 
+                               placeholder="Calle, número, colonia, ciudad">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fecha"><i class="fas fa-calendar-alt"></i> Fecha del Incidente</label>
+                        <input type="date" id="fecha" name="fecha" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Anterior</button>
+                        <button type="button" class="btn-next" onclick="nextStep(3)">Siguiente <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Paso 3: Evidencia -->
+                <div class="form-step" id="step3">
+                    <div class="form-group">
+                        <label><i class="fas fa-camera"></i> Evidencia Fotográfica</label>
+                        <div class="file-upload" onclick="document.getElementById('fotos').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Arrastra o haz clic para subir fotos</h3>
+                            <p>Puedes subir hasta 5 imágenes (JPG, PNG, max 5MB cada una)</p>
+                        </div>
+                        <input type="file" id="fotos" name="fotos" multiple accept="image/*" style="display: none;" onchange="previewFiles()">
+                        
+                        <div class="file-preview" id="filePreview">
+                            <!-- Previews de imágenes -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notas"><i class="fas fa-sticky-note"></i> Notas Adicionales</label>
+                        <textarea id="notas" name="notas" rows="3" 
+                                  placeholder="Información adicional que consideres relevante..."></textarea>
+                    </div>
+                    
+                    <div class="privacy-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Tu privacidad es importante:</strong> Tu información personal no se compartirá públicamente. 
+                        Solo el equipo administrativo tendrá acceso a tus datos para fines de investigación.
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Anterior</button>
+                        <button type="button" class="btn-next" onclick="nextStep(4)">Siguiente <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Paso 4: Confirmar -->
+                <div class="form-step" id="step4">
+                    <h3 style="text-align: center; margin-bottom: 30px;">
+                        <i class="fas fa-check-circle" style="color: #4CAF50;"></i> Revisa tu Reporte
+                    </h3>
+                    
+                    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                        <div id="reviewContent">
+                            <!-- Resumen se llena con JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="confirmacion" required>
+                            Confirmo que la información proporcionada es verídica y acepto las condiciones
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Anterior</button>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i> Enviar Reporte
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedFiles = [];
+        
+        // Verificar sesión
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/api/estadisticas');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Configurar fecha actual
+            document.getElementById('fecha').valueAsDate = new Date();
+            
+            // Configurar logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                const response = await fetch('/api/logout');
+                const data = await response.json();
+                window.location.href = data.redirect;
+            });
+        });
+        
+        function nextStep(step) {
+            // Validar paso actual
+            if (currentStep === 2) {
+                const titulo = document.getElementById('titulo').value;
+                const descripcion = document.getElementById('descripcion').value;
+                const ubicacion = document.getElementById('ubicacion').value;
+                
+                if (!titulo || !descripcion || !ubicacion) {
+                    showAlert('Por favor completa todos los campos requeridos', 'error');
+                    return;
+                }
+            }
+            
+            document.querySelector(`#step${currentStep}`).classList.remove('active');
+            document.querySelector(`#step${currentStep}-indicator`).classList.remove('active');
+            
+            document.querySelector(`#step${step}`).classList.add('active');
+            document.querySelector(`#step${step}-indicator`).classList.add('active');
+            
+            // Marcar paso anterior como completado
+            for (let i = 1; i < step; i++) {
+                document.querySelector(`#step${i}-indicator`).classList.add('completed');
+            }
+            
+            currentStep = step;
+            
+            // Si es el último paso, mostrar resumen
+            if (step === 4) {
+                showReview();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`#step${currentStep}`).classList.remove('active');
+                document.querySelector(`#step${currentStep}-indicator`).classList.remove('active');
+                document.querySelector(`#step${currentStep}-indicator`).classList.remove('completed');
+                
+                currentStep--;
+                
+                document.querySelector(`#step${currentStep}`).classList.add('active');
+                document.querySelector(`#step${currentStep}-indicator`).classList.add('active');
+            }
+        }
+        
+        function previewFiles() {
+            const files = document.getElementById('fotos').files;
+            const preview = document.getElementById('filePreview');
+            
+            selectedFiles = Array.from(files);
+            preview.innerHTML = '';
+            
+            if (selectedFiles.length > 5) {
+                showAlert('Solo puedes subir máximo 5 imágenes', 'error');
+                selectedFiles = selectedFiles.slice(0, 5);
+            }
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="remove-file" onclick="removeFile(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    preview.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            previewFiles();
+        }
+        
+        function showReview() {
+            const tipo = document.querySelector('input[name="tipo"]:checked').value;
+            const gravedad = document.querySelector('input[name="gravedad"]:checked').value;
+            const titulo = document.getElementById('titulo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const ubicacion = document.getElementById('ubicacion').value;
+            const fecha = document.getElementById('fecha').value;
+            const notas = document.getElementById('notas').value;
+            
+            const tipoText = {
+                'abuso': 'Abuso',
+                'abandono': 'Abandono',
+                'maltrato': 'Negligencia'
+            }[tipo];
+            
+            const gravedadText = {
+                'baja': 'Baja',
+                'media': 'Media',
+                'alta': 'Alta'
+            }[gravedad];
+            
+            document.getElementById('reviewContent').innerHTML = `
+                <p><strong>Tipo:</strong> ${tipoText} (Gravedad: ${gravedadText})</p>
+                <p><strong>Título:</strong> ${titulo}</p>
+                <p><strong>Ubicación:</strong> ${ubicacion}</p>
+                <p><strong>Fecha:</strong> ${new Date(fecha).toLocaleDateString('es-ES')}</p>
+                <p><strong>Descripción:</strong><br>${descripcion}</p>
+                ${notas ? `<p><strong>Notas adicionales:</strong><br>${notas}</p>` : ''}
+                <p><strong>Imágenes:</strong> ${selectedFiles.length} archivo(s)</p>
+            `;
+        }
+        
+        // Manejar envío del formulario
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!document.getElementById('confirmacion').checked) {
+                showAlert('Debes confirmar que la información es verídica', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            
+            // Datos del formulario
+            formData.append('titulo', document.getElementById('titulo').value);
+            formData.append('descripcion', document.getElementById('descripcion').value);
+            formData.append('ubicacion', document.getElementById('ubicacion').value);
+            formData.append('tipo', document.querySelector('input[name="tipo"]:checked').value);
+            
+            // Agregar archivos
+            selectedFiles.forEach(file => {
+                formData.append('fotos', file);
+            });
+            
+            try {
+                const response = await fetch('/api/reportes', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    showAlert('¡Reporte enviado exitosamente! Nos pondremos en contacto si necesitamos más información.', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 3000);
+                } else {
+                    showAlert('Error al enviar el reporte. Intenta nuevamente.', 'error');
+                }
+            } catch (error) {
+                showAlert('Error de conexión. Verifica tu internet.', 'error');
+            }
+        });
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
