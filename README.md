@@ -16,7 +16,7 @@
 
 - [Introducción](#-introducción)
 - [Planteamiento del Problema](#%EF%B8%8F-planteamiento-del-problema)
-- [Objetivos](#objetivos)
+- [Objetivos](?tab=readme-ov-file#-objetivos)
 - [Características del Sistema](#características-del-sistema)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
 - [Requisitos Previos](#requisitos-previos)
