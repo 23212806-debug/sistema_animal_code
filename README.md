@@ -18,14 +18,14 @@
 - [Planteamiento del Problema](#%EF%B8%8F-planteamiento-del-problema)
 - [Objetivos](?tab=readme-ov-file#-objetivos)
 - [Características del Sistema](#-características-del-sistema)
-- [Tecnologías Utilizadas](#tecnologías-utilizadas)
-- [Requisitos Previos](#requisitos-previos)
-- [Instalación](#instalación)
-- [Configuración](#configuración)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Uso del Sistema](#uso-del-sistema)
-- [Resultados Esperados](#resultados-esperados)
-- [Licencia](#licencia)
+- [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+- [Requisitos Previos](#-requisitos-previos)
+- [Instalación](#-instalación)
+- [Configuración](#-configuración)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Uso del Sistema](#-uso-del-sistema)
+- [Resultados Esperados](#-resultados-esperados)
+- [Licencia](#-licencia)
 
 ---
 
