@@ -20,7 +20,7 @@
 - [Características del Sistema](#-características-del-sistema)
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
 - [Requisitos Previos](#-requisitos-previos)
-- [Instalación](#-instalación)
+- [Instalación](#%EF%B8%8F-instalación)
 - [Configuración](#-configuración)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Uso del Sistema](#-uso-del-sistema)
