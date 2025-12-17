@@ -18,7 +18,7 @@
 - [Planteamiento del Problema](#%EF%B8%8F-planteamiento-del-problema)
 - [Objetivos](?tab=readme-ov-file#-objetivos)
 - [Características del Sistema](#-características-del-sistema)
-- [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+- [Tecnologías Utilizadas](#%EF%B8%8F-tecnologías-utilizadas)
 - [Requisitos Previos](#-requisitos-previos)
 - [Instalación](#%EF%B8%8F-instalación)
 - [Configuración](#-configuración)
