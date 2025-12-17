@@ -15,7 +15,7 @@
 ## 📑 Tabla de Contenidos
 
 - [Introducción](#-introducción)
-- [Planteamiento del Problema](#planteamiento-del-problema)
+- [Planteamiento del Problema](#-planteamiento-del-problema)
 - [Objetivos](#objetivos)
 - [Características del Sistema](#características-del-sistema)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
